@@ -5,8 +5,7 @@ edition = "2021"
 rust-version = "1.86"
 description = "Sentinel Vault: on-chain intent enforcement for AI agents on NEAR"
 license = "MIT"
-repository = "https://github.com/REPLACE_ME/sentinel"
-
+   repository = "https://github.com/Kings1344/sentinel"
 [lib]
 crate-type = ["cdylib", "rlib"]
 
