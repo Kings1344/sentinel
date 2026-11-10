@@ -1,0 +1,5 @@
+[toolchain]
+# NEAR's wasm runtime does not accept some wasm features enabled by default in newer Rust releases.
+channel = "1.86.0"
+components = ["rustfmt", "clippy"]
+targets = ["wasm32-unknown-unknown"]

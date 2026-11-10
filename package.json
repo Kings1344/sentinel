@@ -1,0 +1,17 @@
+{
+  "name": "sentinel",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "npm run dev -w @sentinel/web",
+    "build": "npm run build -w @sentinel/web",
+    "start": "npm run start -w @sentinel/web",
+    "test": "npm run test -w @sentinel/engine",
+    "test:contract": "cd contracts/sentinel-vault && cargo test --lib",
+    "test:sandbox": "cd contracts/sentinel-vault && cargo test --test sandbox",
+    "test:all": "npm test && npm run test:contract && npm run test:sandbox",
+    "typecheck": "npm run typecheck -w @sentinel/engine && npm run typecheck -w @sentinel/web",
+    "build:contract": "bash scripts/build.sh"
+  },
+  "engines": { "node": ">=20" }
+}

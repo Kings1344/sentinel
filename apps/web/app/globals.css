@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #0d1117;
+  --color-panel: #121a2a;
+  --color-raised: #182339;
+  --color-line: #24324d;
+  --color-fg: #e8eef8;
+  --color-dim: #96a3bb;
+  --color-faint: #64718a;
+  --color-signal: #2f7bff;
+  --color-pass: #25c590;
+  --color-block: #ff5c5c;
+  --color-hold: #f2b441;
+  --font-sans: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-code), ui-monospace, SFMono-Regular, monospace;
+}
+
+html { background: var(--color-ink); color: var(--color-fg); color-scheme: dark; }
+body { font-feature-settings: "ss01", "cv11"; -webkit-font-smoothing: antialiased; }
+::selection { background: color-mix(in oklab, var(--color-signal) 40%, transparent); }
+:focus-visible { outline: 2px solid var(--color-signal); outline-offset: 2px; border-radius: 4px; }
+
+/* The one orchestrated moment: mismatched rows of an intent diff resolve into place. */
+@keyframes diff-flag { from { background-color: color-mix(in oklab, var(--color-block) 35%, transparent); } }
+.diff-flag { animation: diff-flag 900ms ease-out both; }
+@media (prefers-reduced-motion: reduce) { .diff-flag { animation: none; } }
+
+.tabular { font-variant-numeric: tabular-nums; }
