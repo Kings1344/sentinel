@@ -249,7 +249,7 @@ export default function CapsulesPage() {
                 <div className="min-w-0">
                   <div className="text-sm font-semibold">Tamper check</div>
                   <p className="mt-0.5 text-[13px] text-dim">A SHA-256 fingerprint of these exact terms, computed by the contract and again in your browser. The contract refuses the capsule if the signed terms don't match it.</p>
-                  <Mono className="mt-2 block text-[12.5px] text-faint">{review.onchain}</Mono>
+                  <Mono className="mt-2 block text-[13px] text-faint">{review.onchain}</Mono>
                   {review.onchain === review.local
                     ? <p className="mt-2 flex items-center gap-1.5 text-[13px] font-medium text-[#34d399]"><Check className="size-4" />Both fingerprints match</p>
                     : <p className="mt-2 text-[13px] font-medium text-[#ff7b7b]">They don't match. Don't sign; check the configured contract.</p>}

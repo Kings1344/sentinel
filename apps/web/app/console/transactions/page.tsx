@@ -59,7 +59,7 @@ function Transactions() {
               <tbody>
                 {list.map((r) => (
                   <tr key={r.id} onClick={() => router.push(`/console/transactions/${r.id}`)} className="group cursor-pointer border-b border-line/60 transition-colors last:border-0 hover:bg-hover/50">
-                    <td className="py-3.5 pr-3 pl-6"><Link href={`/console/transactions/${r.id}`} className="font-medium tabular hover:underline" onClick={(e) => e.stopPropagation()}>#{r.id}</Link><div className="mt-0.5 text-[12.5px] text-faint"><Mono>{short(r.agent_id, 16)}</Mono></div></td>
+                    <td className="py-3.5 pr-3 pl-6"><Link href={`/console/transactions/${r.id}`} className="font-medium tabular hover:underline" onClick={(e) => e.stopPropagation()}>#{r.id}</Link><div className="mt-0.5 text-[13px] text-faint"><Mono>{short(r.agent_id, 16)}</Mono></div></td>
                     <td className="px-3 py-3.5"><StatusPill r={r} size="sm" /></td>
                     <td className="px-3 py-3.5 text-right font-medium tabular">{near(r.amount, 3)}</td>
                     <td className="max-w-[220px] px-3 py-3.5"><Mono className="block truncate">{r.recipient}</Mono></td>

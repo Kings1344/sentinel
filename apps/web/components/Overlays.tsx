@@ -181,7 +181,7 @@ export function NotificationBell() {
                 <div className="min-w-0 flex-1">
                   {n.href ? <Link href={n.href} onClick={() => setOpen(false)} className="font-medium hover:underline">{n.title}</Link> : <p className="font-medium">{n.title}</p>}
                   {n.body && <p className="mt-0.5 break-words text-dim">{n.body}</p>}
-                  <div className="mt-1 flex items-center gap-3 text-[12.5px] text-faint">
+                  <div className="mt-1 flex items-center gap-3 text-[13px] text-faint">
                     <span>{ago(n.at)}</span>
                     {n.hash && <a href={txUrl(n.hash)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-link hover:underline">Transaction <ExternalLink className="size-3" /></a>}
                   </div>

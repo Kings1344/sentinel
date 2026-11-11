@@ -43,7 +43,7 @@ export default function AgentsPage() {
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2"><h2 className="text-[17px] font-semibold tracking-[-0.01em]">{a.label}</h2><AgentStatusBadge status={a.status} /></div>
                       <Mono className="mt-0.5 block text-[13px] text-dim">{a.account_id}</Mono>
-                      <div className="mt-1 text-[12.5px] text-faint">Registered {ago(a.registered_at_ms)}</div>
+                      <div className="mt-1 text-[13px] text-faint">Registered {ago(a.registered_at_ms)}</div>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2">

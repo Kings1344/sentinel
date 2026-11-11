@@ -74,7 +74,7 @@ export default function SecurityPage() {
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="text-sm font-semibold">{KIND[e.kind] ?? e.kind}</span>
                           <Badge tone={SEV_TONE[e.severity]}>{cap(e.severity)}</Badge>
-                          <span className="text-[12.5px] text-faint">{ago(e.atMs)}</span>
+                          <span className="text-[13px] text-faint">{ago(e.atMs)}</span>
                         </div>
                         <p className="mt-1.5 text-[13px] leading-relaxed text-dim">{e.summary}</p>
                         <div className="mt-2 flex flex-wrap gap-3">{e.requestIds.map((id) => <Link key={id} href={`/console/transactions/${id}`} className="text-[13px] font-medium text-link hover:underline">Transaction #{id}</Link>)}</div>

@@ -69,18 +69,18 @@ export function Panel({ title, description, action, icon, children, className, p
   return (
     <section className={cx("surface", className)}>
       {(title || action) && (
-        <header className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 border-b border-line px-6 py-4">
+        <header className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 border-b border-line px-5 py-4 sm:px-6">
           <div className="flex min-w-0 items-start gap-3">
             {icon && <span className="mt-0.5 text-dim">{icon}</span>}
             <div className="min-w-0">
-              <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-fg">{title}</h2>
+              <h2 className="text-base font-semibold tracking-[-0.01em] text-fg">{title}</h2>
               {description && <p className="mt-0.5 text-[13px] leading-relaxed text-dim">{description}</p>}
             </div>
           </div>
           {action && <div className="flex items-center gap-2">{action}</div>}
         </header>
       )}
-      <div className={padded ? "p-6" : ""}>{children}</div>
+      <div className={padded ? "p-5 sm:p-6" : ""}>{children}</div>
     </section>
   );
 }
@@ -212,13 +212,14 @@ export function Empty({ title, children, icon, action }: { title: string; childr
 /** Metric card: label + icon, large value, one supporting line. */
 export function MetricCard({ label, value, footnote, icon, tone }: { label: string; value: ReactNode; footnote?: ReactNode; icon?: ReactNode; tone?: "pass" | "block" | "hold" }) {
   return (
-    <div className="surface p-5">
+    <div className="surface relative overflow-hidden p-5 sm:p-6">
+      {tone && <span className={cx("absolute inset-x-0 top-0 h-0.5", toneDot[tone])} aria-hidden />}
       <div className="flex items-center justify-between gap-3">
-        <span className="text-[13px] font-medium text-dim">{label}</span>
-        {icon && <span className={cx("grid size-8 place-items-center rounded-lg border", tone ? cx(toneBg[tone], toneText[tone]) : "border-line-strong bg-raised text-dim")}>{icon}</span>}
+        <span className="text-sm font-medium text-dim">{label}</span>
+        {icon && <span className={cx("grid size-9 place-items-center rounded-[10px] border", tone ? cx(toneBg[tone], toneText[tone]) : "border-line-strong bg-raised text-dim")}>{icon}</span>}
       </div>
-      <div className={cx("mt-3 text-[30px] leading-none font-semibold tracking-[-0.03em] tabular", tone === "block" && "text-[#ff7b7b]", tone === "pass" && "text-[#34d399]", tone === "hold" && "text-[#fbbf24]")}>{value}</div>
-      {footnote && <div className="mt-2.5 text-[13px] leading-snug text-faint">{footnote}</div>}
+      <div className={cx("mt-4 truncate text-[24px] leading-none font-semibold tracking-[-0.035em] tabular sm:text-[30px] xl:text-[34px]", tone === "block" ? "text-[#ff7b7b]" : tone === "pass" ? "text-[#34d399]" : tone === "hold" ? "text-[#fbbf24]" : "text-fg")}>{value}</div>
+      {footnote && <div className="mt-3 text-[13px] leading-snug text-dim">{footnote}</div>}
     </div>
   );
 }
@@ -229,9 +230,9 @@ export function Skeleton({ className }: { className?: string }) {
 
 export function MetricSkeletons({ count = 4 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-2 gap-4 xl:grid-cols-4" aria-busy="true" aria-label="Loading">
+    <div className="grid grid-cols-2 gap-4 lg:gap-5 xl:grid-cols-4" aria-busy="true" aria-label="Loading">
       {Array.from({ length: count }, (_, i) => (
-        <div key={i} className="surface p-5"><Skeleton className="h-4 w-24" /><Skeleton className="mt-4 h-8 w-20" /><Skeleton className="mt-3 h-3.5 w-36" /></div>
+        <div key={i} className="surface p-5 sm:p-6"><Skeleton className="h-4 w-24" /><Skeleton className="mt-5 h-9 w-24" /><Skeleton className="mt-4 h-3.5 w-36" /></div>
       ))}
     </div>
   );
@@ -261,7 +262,7 @@ export function Row({ label, children }: { label: string; children: ReactNode })
   return (
     <div className="flex items-baseline justify-between gap-4 py-2 text-sm">
       <dt className="shrink-0 text-dim">{label}</dt>
-      <dd className="min-w-0 text-right">{children}</dd>
+      <dd className="min-w-0 text-right font-medium text-fg">{children}</dd>
     </div>
   );
 }

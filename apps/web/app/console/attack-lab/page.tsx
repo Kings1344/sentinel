@@ -216,7 +216,7 @@ export default function AttackLab() {
                         <span className="font-medium">{getScenario(h.scenario).title}</span>
                         {d && <DecisionBadge decision={d.decision} />}
                         <Badge tone={h.mode === "onchain" ? "signal" : "hold"}>{h.mode === "onchain" ? "On-chain" : "Simulation"}</Badge>
-                        <span className="ml-auto text-[12.5px] text-faint">{new Date(h.at).toLocaleTimeString()}</span>
+                        <span className="ml-auto text-[13px] text-faint">{new Date(h.at).toLocaleTimeString()}</span>
                       </button>
                     </li>
                   );
@@ -331,7 +331,7 @@ function ResultStage({ r, playKey, onReplay }: { r: RunResult; playKey: string; 
           </div>
           <div>
             <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold">Untrusted content <Badge tone="block">Attacker controlled</Badge></h3>
-            <pre className="scroll-quiet max-h-40 overflow-auto rounded-[10px] border border-block/25 bg-block/[0.04] p-3.5 font-mono text-[12.5px] leading-relaxed whitespace-pre-wrap text-dim">{r.externalContent || "(none)"}</pre>
+            <pre className="scroll-quiet max-h-40 overflow-auto rounded-[10px] border border-block/25 bg-block/[0.04] p-3.5 font-mono text-[13px] leading-relaxed whitespace-pre-wrap text-dim">{r.externalContent || "(none)"}</pre>
           </div>
         </section>
 

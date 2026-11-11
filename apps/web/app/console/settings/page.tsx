@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { BellRing, Globe, OctagonX, Wallet, Vault } from "lucide-react";
+import { BellRing, Globe, Landmark, OctagonX, Wallet } from "lucide-react";
 import { parseNear } from "@sentinel/engine";
 import { useVault, POLL_KEY } from "@/lib/vault";
 import { useWallet } from "@/lib/wallet";
@@ -61,7 +61,7 @@ export default function SettingsPage() {
           <p className="mt-4 text-[13px] leading-relaxed text-faint">Fixed when the app is built, so nobody can point this console at a different vault.</p>
         </Panel>
 
-        <Panel title="Vault funds" icon={<Vault className="size-4" />}>
+        <Panel title="Vault funds" icon={<Landmark className="size-4" />}>
           {overview && (
             <div className="mb-6 grid grid-cols-2 gap-3">
               <div className="surface-raised p-4"><div className="text-[13px] text-dim">Available</div><div className="mt-1 text-xl font-semibold tracking-[-0.02em] tabular">{near(overview.vault_balance)}</div></div>
