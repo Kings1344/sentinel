@@ -1,29 +1,54 @@
 @import "tailwindcss";
 
+/* Sentinel command centre tokens: midnight navy ground, charcoal surfaces, semantic emerald/red/amber. */
 @theme {
-  --color-ink: #0d1117;
-  --color-panel: #121a2a;
-  --color-raised: #182339;
-  --color-line: #24324d;
-  --color-fg: #e8eef8;
-  --color-dim: #96a3bb;
-  --color-faint: #64718a;
-  --color-signal: #2f7bff;
-  --color-pass: #25c590;
-  --color-block: #ff5c5c;
-  --color-hold: #f2b441;
+  --color-ink: #0a1122;
+  --color-panel: #171b24;
+  --color-raised: #20252f;
+  --color-line: #2c3340;
+  --color-fg: #eceff5;
+  --color-dim: #9aa3b4;
+  --color-faint: #687183;
+  --color-signal: #4b8bff;
+  --color-pass: #10b981;
+  --color-block: #f05252;
+  --color-hold: #f5a524;
   --font-sans: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-code), ui-monospace, SFMono-Regular, monospace;
 }
 
 html { background: var(--color-ink); color: var(--color-fg); color-scheme: dark; }
-body { font-feature-settings: "ss01", "cv11"; -webkit-font-smoothing: antialiased; }
+body {
+  -webkit-font-smoothing: antialiased;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, color-mix(in oklab, var(--color-signal) 7%, transparent), transparent 60%),
+    var(--color-ink);
+  background-attachment: fixed;
+}
 ::selection { background: color-mix(in oklab, var(--color-signal) 40%, transparent); }
-:focus-visible { outline: 2px solid var(--color-signal); outline-offset: 2px; border-radius: 4px; }
-
-/* The one orchestrated moment: mismatched rows of an intent diff resolve into place. */
-@keyframes diff-flag { from { background-color: color-mix(in oklab, var(--color-block) 35%, transparent); } }
-.diff-flag { animation: diff-flag 900ms ease-out both; }
-@media (prefers-reduced-motion: reduce) { .diff-flag { animation: none; } }
+:focus-visible { outline: 2px solid var(--color-signal); outline-offset: 2px; border-radius: 6px; }
 
 .tabular { font-variant-numeric: tabular-nums; }
+
+/* Intent diff: mismatched rows flash once when a result arrives. */
+@keyframes diff-flag { from { background-color: color-mix(in oklab, var(--color-block) 35%, transparent); } }
+.diff-flag { animation: diff-flag 900ms ease-out both; }
+
+/* Attack Lab: each check resolves into place. */
+@keyframes check-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.check-in { animation: check-in 220ms ease-out both; }
+
+/* Live monitor heartbeat. */
+@keyframes live-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-pass) 60%, transparent); } 70% { box-shadow: 0 0 0 7px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+.live-dot { animation: live-pulse 2s ease-out infinite; }
+
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+.skeleton { position: relative; overflow: hidden; background: var(--color-raised); }
+.skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--color-fg) 6%, transparent), transparent); animation: shimmer 1.4s infinite; }
+
+@keyframes dialog-in { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
+.dialog-in { animation: dialog-in 160ms ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .diff-flag, .check-in, .live-dot, .dialog-in, .skeleton::after { animation: none; }
+}

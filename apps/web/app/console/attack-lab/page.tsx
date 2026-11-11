@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ExternalLink, FlaskConical, Radio } from "lucide-react";
+import { ExternalLink, FlaskConical, Radio, RotateCcw, ShieldAlert, ShieldCheck, ShieldX } from "lucide-react";
 import {
   SCENARIOS, defaultTask, effectiveCapsuleStatus, getScenario,
   type Agent, type Capsule, type Check, type Decision, type Evaluation, type ReasonCode, type ScenarioId, type TransferRequest, type Verdict,
@@ -11,6 +11,7 @@ import { useWallet } from "@/lib/wallet";
 import { ownerActions } from "@/lib/actions";
 import { rememberTx } from "@/lib/txlog";
 import { PageTitle, OwnerHint, useAction } from "@/components/ConsoleShell";
+import { useConfirm } from "@/components/Overlays";
 import { Badge, Button, Empty, Field, Mono, Notice, Panel, Select, Textarea, cx } from "@/components/ui";
 import { DecisionBadge, reasonText } from "@/components/status";
 import { IntentDiff, diffRows } from "@/components/IntentDiff";
@@ -52,6 +53,9 @@ export default function AttackLab() {
   const [useLlm, setUseLlm] = useState(false);
   const [running, setRunning] = useState<string | null>(null);
   const [result, setResult] = useState<RunResult | null>(null);
+  const [history, setHistory] = useState<(RunResult & { at: number })[]>([]);
+  const [playKey, setPlayKey] = useState("0");
+  const confirmDialog = useConfirm();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => { fetch("/api/agent/info").then((r) => r.json()).then(setInfo).catch(() => setInfo({ agentConfigured: false, agentAccountId: null, llmConfigured: false })); }, []);
@@ -89,6 +93,8 @@ export default function AttackLab() {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? `Request failed (${res.status})`);
       setResult(json);
+      setPlayKey(String(Date.now()));
+      setHistory((h) => [{ ...json, at: Date.now() }, ...h].slice(0, 8));
       const reqId = json.final?.request_id ?? json.onchain?.request_id;
       if (json.txHash && reqId) rememberTx(reqId, json.txHash);
       if (json.mode === "onchain") await refresh();
@@ -128,7 +134,7 @@ export default function AttackLab() {
             ))}
           </div>
         </div>
-        {usable.length === 0 && <p className="mt-3 text-sm text-dim">Create a capsule for {info?.agentAccountId ? <Mono>{info.agentAccountId}</Mono> : "your agent"} on the <Link className="text-[#7fb0ff]" href="/console/capsules">Capsules page</Link> first.</p>}
+        {usable.length === 0 && <p className="mt-3 text-sm text-dim">Create a capsule for {info?.agentAccountId ? <Mono>{info.agentAccountId}</Mono> : "your agent"} on the <Link className="text-[#8fb6ff]" href="/console/capsules">Capsules page</Link> first.</p>}
       </Panel>
 
       {error && <div className="mb-4"><Notice tone="block">{error}</Notice></div>}
@@ -154,11 +160,11 @@ export default function AttackLab() {
                         {pre && <p className="mt-2 text-xs text-hold">{pre}</p>}
                         {id === "revoked_agent" && agent && agent.status !== "Revoked" && (
                           <div className="mt-2 space-y-1">
-                            <Button variant="danger" disabled={!isOwner} busy={ownerBusy === "lab-revoke"} onClick={() => { if (confirm(`Revoke ${agent.account_id}? Its capsules are revoked permanently.`)) runOwner("lab-revoke", "Revoke agent", () => ownerActions(call).revokeAgent(agent.account_id)); }}>Revoke agent now</Button>
+                            <Button variant="danger" disabled={!isOwner} busy={ownerBusy === "lab-revoke"} onClick={async () => { if (await confirmDialog({ title: `Revoke ${agent.account_id}?`, body: "The agent and all of its capsules are revoked permanently. Run this scenario last.", confirmLabel: "Revoke agent", tone: "danger" })) runOwner("lab-revoke", "Revoke agent", () => ownerActions(call).revokeAgent(agent.account_id)); }}>Revoke agent now</Button>
                             <OwnerHint />
                           </div>
                         )}
-                        {id === "expired" && pre && <p className="mt-1 text-xs"><Link className="text-[#7fb0ff]" href="/console/capsules">Create a 1-minute capsule</Link>, wait, then select it above.</p>}
+                        {id === "expired" && pre && <p className="mt-1 text-xs"><Link className="text-[#8fb6ff]" href="/console/capsules">Create a 1-minute capsule</Link>, wait, then select it above.</p>}
                         <div className="mt-2 flex flex-wrap gap-2">
                           {signer && <Button variant="primary" disabled={!!pre || !!running} busy={running === `${id}-false`} onClick={() => execute(id, false)}>Run on-chain</Button>}
                           <Button disabled={!capsule || !!running} busy={running === `${id}-true`} onClick={() => execute(id, true)}>Simulate</Button>
@@ -194,62 +200,103 @@ export default function AttackLab() {
           )}
         </div>
 
-        <div>{result ? <ResultView r={result} /> : <Panel><Empty title="No run yet">Pick a step and run it. The result shows the owner's capsule, what the agent proposed, every check and the decision.</Empty></Panel>}</div>
+        <div className="space-y-4">
+          {result ? <ResultView r={result} playKey={playKey} onReplay={() => setPlayKey(String(Date.now()))} /> : <Panel><Empty title="No run yet">Pick a scenario and run it. You'll see the owner's capsule, what the hijacked agent proposed, each check as the contract runs it, and the decision.</Empty></Panel>}
+          {history.length > 1 && (
+            <Panel title="Incident replay" description="Runs from this session. Select one to play its checks again.">
+              <ul className="space-y-1">
+                {history.map((h) => {
+                  const d = h.mode === "onchain" ? (h.final ?? h.onchain) : h.preview;
+                  return (
+                    <li key={h.at}>
+                      <button onClick={() => { setResult(h); setPlayKey(String(Date.now())); }} className={cx("flex w-full flex-wrap items-center gap-2 rounded-lg px-2 py-2 text-left text-sm hover:bg-raised/60", result === h && "bg-raised/60")}>
+                        <span className="font-medium">{getScenario(h.scenario).title}</span>
+                        {d && <DecisionBadge decision={d.decision} />}
+                        <Badge tone={h.mode === "onchain" ? "signal" : "hold"}>{h.mode === "onchain" ? "On-chain" : "Simulation"}</Badge>
+                        <span className="ml-auto text-xs text-faint">{new Date(h.at).toLocaleTimeString()}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </Panel>
+          )}
+        </div>
       </div>
     </>
   );
 }
 
-function ResultView({ r }: { r: RunResult }) {
+/** Plays checks back one at a time (instantly when the user prefers reduced motion). */
+function useReveal(total: number, key: string): number {
+  const [n, setN] = useState(total);
+  useEffect(() => {
+    const reduce = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce || total === 0) { setN(total); return; }
+    setN(0);
+    let i = 0;
+    const id = setInterval(() => { i += 1; setN(i); if (i >= total) clearInterval(id); }, 170);
+    return () => clearInterval(id);
+  }, [total, key]);
+  return n;
+}
+
+function ResultView({ r, playKey, onReplay }: { r: RunResult; playKey: string; onReplay: () => void }) {
   const decided: Evaluation | Verdict | null = r.mode === "onchain" ? (r.final ?? r.onchain ?? null) : r.preview;
   const checks: Check[] = (r.mode === "onchain" ? r.onchain?.checks : r.preview.checks) ?? [];
+  const revealed = useReveal(checks.length, playKey);
+  const done = revealed >= checks.length;
   const matchesExpected = decided && decided.decision === r.expected.decision && decided.reason === r.expected.reason;
+  const tone = !decided ? "block" : decided.decision === "Approved" ? "pass" : decided.decision === "RequiresHumanReview" ? "hold" : "block";
+  const Icon = tone === "pass" ? ShieldCheck : tone === "hold" ? ShieldAlert : ShieldX;
   return (
     <Panel
-      title={<span className="flex items-center gap-2">{getScenario(r.scenario).title}{r.mode === "onchain" ? <Badge tone="signal">On-chain result</Badge> : <Badge tone="hold">Simulation, not sent to the contract</Badge>}</span>}
+      title={<span className="flex flex-wrap items-center gap-2">{getScenario(r.scenario).title}{r.mode === "onchain" ? <Badge tone="signal">On-chain result</Badge> : <Badge tone="hold">Simulation, not sent to the contract</Badge>}</span>}
+      action={<Button variant="ghost" onClick={onReplay} disabled={!done}><RotateCcw className="size-4" />Replay</Button>}
     >
       <div className="space-y-5 text-sm">
         {r.note && <Notice tone="hold">{r.note}</Notice>}
         {r.failed && <Notice tone="block">The contract refused the transaction outright: {r.error}</Notice>}
 
-        {decided && (
-          <div className={cx("rounded-md border p-3", decided.decision === "Approved" ? "border-pass/50" : decided.decision === "RequiresHumanReview" ? "border-hold/50" : "border-block/50")}>
-            <div className="flex flex-wrap items-center gap-2">
-              <DecisionBadge decision={decided.decision} />
-              <span className="font-medium">{reasonText(decided.reason)}</span>
-              {"status" in decided && <span className="text-dim">· request #{(decided as Evaluation).request_id}, {(decided as Evaluation).status === "Executed" ? "funds sent" : (decided as Evaluation).status === "Rejected" ? "no funds moved" : (decided as Evaluation).status}</span>}
-            </div>
-            <p className="mt-2">{decided.explanation}</p>
-            <p className={cx("mt-2 text-xs", matchesExpected ? "text-pass" : "text-hold")}>{matchesExpected ? "Matches the expected outcome for this scenario." : `Expected ${r.expected.decision} / ${r.expected.reason}. Check the scenario's precondition.`}</p>
-            {r.explorerUrl && <a className="mt-2 inline-flex items-center gap-1 text-[#7fb0ff] hover:underline" href={r.explorerUrl} target="_blank" rel="noreferrer">Transaction <Mono>{r.txHash?.slice(0, 14)}…</Mono><ExternalLink className="size-3" /></a>}
+        <section className="grid gap-4 md:grid-cols-2">
+          <div>
+            <h3 className="mb-1.5 font-medium">The owner's task</h3>
+            <p className="rounded-lg border border-line bg-ink/70 p-2.5 text-dim">{r.task}</p>
           </div>
-        )}
+          <div>
+            <h3 className="mb-1.5 font-medium">Untrusted content the agent read</h3>
+            <pre className="max-h-40 overflow-auto rounded-lg border border-block/30 bg-ink/70 p-2.5 font-mono text-xs whitespace-pre-wrap text-dim">{r.externalContent || "(none)"}</pre>
+          </div>
+        </section>
 
         <section>
           <h3 className="mb-2 font-medium">What the owner authorized vs what the agent proposed</h3>
-          <IntentDiff key={`${r.scenario}-${r.txHash ?? r.proposal.nonce}-${r.mode}`} rows={diffRows(r.capsule, r.proposal)} />
+          <IntentDiff key={`${playKey}-diff`} rows={diffRows(r.capsule, r.proposal)} />
         </section>
 
         <section>
-          <h3 className="mb-2 font-medium">Checks {r.mode === "onchain" ? "run by the contract" : "run by the off-chain engine"}</h3>
-          <ChecksList checks={checks} />
+          <h3 className="mb-2 font-medium">{done ? "Checks" : "Checking"} {r.mode === "onchain" ? "run by the contract" : "run by the off-chain engine"}</h3>
+          <ChecksList checks={checks} revealed={revealed} />
         </section>
 
-        <section className="grid gap-4 md:grid-cols-2">
-          <div>
-            <h3 className="mb-1.5 font-medium">Owner's task</h3>
-            <p className="rounded-md border border-line bg-ink p-2.5 text-dim">{r.task}</p>
+        {decided && done && (
+          <div className={cx("check-in rounded-xl border p-4", tone === "pass" && "border-pass/50 bg-pass/6", tone === "hold" && "border-hold/50 bg-hold/6", tone === "block" && "border-block/50 bg-block/6")}>
+            <div className="flex flex-wrap items-center gap-2">
+              <Icon className={cx("size-5", tone === "pass" && "text-pass", tone === "hold" && "text-hold", tone === "block" && "text-block")} aria-hidden />
+              <DecisionBadge decision={decided.decision} />
+              <span className="font-semibold">{reasonText(decided.reason)}</span>
+              {"status" in decided && <span className="text-dim">Request #{(decided as Evaluation).request_id}, {(decided as Evaluation).status === "Executed" ? "funds sent" : (decided as Evaluation).status === "Rejected" ? "no funds moved" : (decided as Evaluation).status}</span>}
+            </div>
+            <p className="mt-2">{decided.explanation}</p>
+            <p className={cx("mt-2 text-xs", matchesExpected ? "text-pass" : "text-hold")}>{matchesExpected ? "Matches the expected outcome for this scenario." : `Expected ${r.expected.decision} / ${r.expected.reason}. Check the scenario's precondition.`}</p>
+            {r.explorerUrl && <a className="mt-2 inline-flex items-center gap-1 text-[#8fb6ff] hover:underline" href={r.explorerUrl} target="_blank" rel="noreferrer">Transaction <Mono>{r.txHash?.slice(0, 14)}…</Mono><ExternalLink className="size-3" /></a>}
           </div>
-          <div>
-            <h3 className="mb-1.5 font-medium">Untrusted content</h3>
-            <pre className="max-h-40 overflow-auto rounded-md border border-block/30 bg-ink p-2.5 font-mono text-xs whitespace-pre-wrap text-dim">{r.externalContent || "(none)"}</pre>
-          </div>
-        </section>
+        )}
 
-        <section>
-          <h3 className="mb-1.5 font-medium">Agent reasoning trace</h3>
-          <ol className="list-decimal space-y-0.5 pl-5 text-dim">{r.trace.map((t, i) => <li key={i}>{t}</li>)}</ol>
-        </section>
+        <details className="text-dim">
+          <summary className="cursor-pointer text-fg">How the agent built this request</summary>
+          <ol className="mt-2 list-decimal space-y-0.5 pl-5">{r.trace.map((t, i) => <li key={i}>{t}</li>)}</ol>
+        </details>
       </div>
     </Panel>
   );
