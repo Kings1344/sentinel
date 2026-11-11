@@ -1,76 +1,92 @@
 "use client";
 import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { ChevronRight, Search } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Activity, ChevronRight, Search } from "lucide-react";
 import type { RequestRecord } from "@sentinel/engine";
 import { useVault } from "@/lib/vault";
 import { PageTitle } from "@/components/ConsoleShell";
-import { Empty, Input, ListSkeleton, Mono, Panel, cx } from "@/components/ui";
-import { DecisionBadge, RequestStatusBadge, reasonText } from "@/components/status";
-import { ago, near } from "@/lib/format";
+import { Empty, Input, ListSkeleton, Mono, Segmented } from "@/components/ui";
+import { StatusPill, reasonText } from "@/components/status";
+import { ago, near, short } from "@/lib/format";
 
-const FILTERS = [
+type F = "all" | "approved" | "stopped" | "review";
+const FILTERS: { id: F; label: string; match: (r: RequestRecord) => boolean }[] = [
   { id: "all", label: "All", match: () => true },
-  { id: "approved", label: "Approved", match: (r: RequestRecord) => r.decision === "Approved" },
-  { id: "stopped", label: "Blocked", match: (r: RequestRecord) => r.decision !== "Approved" && r.decision !== "RequiresHumanReview" },
-  { id: "review", label: "Awaiting approval", match: (r: RequestRecord) => r.status === "PendingReview" },
-] as const;
+  { id: "approved", label: "Approved", match: (r) => r.decision === "Approved" },
+  { id: "stopped", label: "Blocked", match: (r) => r.decision !== "Approved" && r.decision !== "RequiresHumanReview" },
+  { id: "review", label: "Awaiting approval", match: (r) => r.status === "PendingReview" },
+];
 
 function Transactions() {
   const params = useSearchParams();
+  const router = useRouter();
   const { requests, loading, overview } = useVault();
-  const [filter, setFilter] = useState<string>(params.get("filter") ?? "all");
+  const [filter, setFilter] = useState<F>((params.get("filter") as F) ?? "all");
   const [q, setQ] = useState("");
   const f = FILTERS.find((x) => x.id === filter) ?? FILTERS[0];
   const needle = q.trim().toLowerCase();
-  const list = requests.filter(f.match).filter((r) =>
-    !needle || `#${r.id} ${r.agent_id} ${r.recipient} ${r.reason} ${reasonText(r.reason)}`.toLowerCase().includes(needle),
-  );
+  const list = requests.filter(f.match).filter((r) => !needle || `#${r.id} ${r.agent_id} ${r.recipient} ${r.reason} ${reasonText(r.reason)}`.toLowerCase().includes(needle));
 
   return (
     <>
       <PageTitle title="Transactions">Every payment an agent asked for, and the contract's decision. Blocked requests are recorded on-chain, and no funds moved for them.</PageTitle>
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <div role="tablist" aria-label="Filter transactions" className="flex flex-wrap gap-1">
-          {FILTERS.map((x) => (
-            <button key={x.id} role="tab" aria-selected={filter === x.id} onClick={() => setFilter(x.id)}
-              className={cx("rounded-lg px-3 py-1.5 text-sm", filter === x.id ? "bg-raised text-fg" : "text-dim hover:text-fg")}>
-              {x.label} <span className="text-faint tabular">{requests.filter(x.match).length}</span>
-            </button>
-          ))}
-        </div>
-        <label className="relative w-full sm:w-72">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <Segmented label="Filter transactions" value={filter} onChange={setFilter} options={FILTERS.map((x) => ({ value: x.id, label: x.label, count: requests.filter(x.match).length }))} />
+        <label className="relative w-full sm:w-80">
           <span className="sr-only">Search transactions</span>
-          <Search className="pointer-events-none absolute top-2.5 left-3 size-4 text-faint" aria-hidden />
+          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-faint" aria-hidden />
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search agent, recipient or reason" className="pl-9" />
         </label>
       </div>
-      <Panel padded={false}>
-        {loading && !overview ? <div className="p-5"><ListSkeleton rows={6} /></div> : list.length === 0 ? (
-          <div className="p-5"><Empty title={requests.length ? "No transactions match" : "No transactions yet"}>{requests.length ? "Try another filter or search." : "Agent requests appear here as soon as they reach the contract."}</Empty></div>
+
+      <div className="surface overflow-hidden">
+        {loading && !overview ? <div className="p-6"><ListSkeleton rows={6} /></div> : list.length === 0 ? (
+          <Empty title={requests.length ? "No transactions match" : "No transactions yet"} icon={<Activity className="size-5" />}>{requests.length ? "Try another filter or search term." : "Agent requests appear here as soon as they reach the contract."}</Empty>
         ) : (
-          <ul className="divide-y divide-line/70">
-            {list.map((r) => (
-              <li key={r.id}>
-                <Link href={`/console/transactions/${r.id}`} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-5 py-3.5 text-sm hover:bg-raised/50">
-                  <span className="w-9 text-faint tabular">#{r.id}</span>
-                  <DecisionBadge decision={r.decision} />
-                  <RequestStatusBadge status={r.status} />
-                  <span className="min-w-0 flex-1 truncate">{near(r.amount)} to <Mono>{r.recipient}</Mono></span>
-                  <span className="text-dim">{reasonText(r.reason)}</span>
-                  <span className="w-20 text-right text-xs text-faint">{ago(r.created_at_ms)}</span>
-                  <ChevronRight className="size-4 text-faint" aria-hidden />
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <>
+            <table className="hidden w-full text-sm md:table">
+              <thead>
+                <tr className="border-b border-line bg-raised/40 text-left text-[13px] text-dim">
+                  <th scope="col" className="py-3 pr-3 pl-6 font-medium">Request</th>
+                  <th scope="col" className="px-3 py-3 font-medium">Status</th>
+                  <th scope="col" className="px-3 py-3 text-right font-medium">Amount</th>
+                  <th scope="col" className="px-3 py-3 font-medium">Recipient</th>
+                  <th scope="col" className="px-3 py-3 font-medium">Reason</th>
+                  <th scope="col" className="py-3 pr-6 pl-3 text-right font-medium">Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {list.map((r) => (
+                  <tr key={r.id} onClick={() => router.push(`/console/transactions/${r.id}`)} className="group cursor-pointer border-b border-line/60 transition-colors last:border-0 hover:bg-hover/50">
+                    <td className="py-3.5 pr-3 pl-6"><Link href={`/console/transactions/${r.id}`} className="font-medium tabular hover:underline" onClick={(e) => e.stopPropagation()}>#{r.id}</Link><div className="mt-0.5 text-[12.5px] text-faint"><Mono>{short(r.agent_id, 16)}</Mono></div></td>
+                    <td className="px-3 py-3.5"><StatusPill r={r} size="sm" /></td>
+                    <td className="px-3 py-3.5 text-right font-medium tabular">{near(r.amount, 3)}</td>
+                    <td className="max-w-[220px] px-3 py-3.5"><Mono className="block truncate">{r.recipient}</Mono></td>
+                    <td className="px-3 py-3.5 text-dim">{reasonText(r.reason)}</td>
+                    <td className="py-3.5 pr-6 pl-3 text-right whitespace-nowrap text-faint">{ago(r.created_at_ms)}<ChevronRight className="ml-2 inline size-4 opacity-0 transition-opacity group-hover:opacity-100" aria-hidden /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <ul className="divide-y divide-line/70 md:hidden">
+              {list.map((r) => (
+                <li key={r.id}>
+                  <Link href={`/console/transactions/${r.id}`} className="block px-5 py-4 transition-colors hover:bg-hover/50">
+                    <div className="flex items-center justify-between gap-3"><span className="font-medium tabular">#{r.id}</span><StatusPill r={r} size="sm" /></div>
+                    <div className="mt-2 text-sm"><span className="font-medium tabular">{near(r.amount, 3)}</span> <span className="text-dim">to</span> <Mono>{r.recipient}</Mono></div>
+                    <div className="mt-1 text-[13px] text-dim">{reasonText(r.reason)}, {ago(r.created_at_ms)}</div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </>
         )}
-      </Panel>
+      </div>
     </>
   );
 }
 
 export default function TransactionsPage() {
-  return <Suspense fallback={<ListSkeleton rows={6} />}><Transactions /></Suspense>;
+  return <Suspense fallback={<div className="surface p-6"><ListSkeleton rows={6} /></div>}><Transactions /></Suspense>;
 }

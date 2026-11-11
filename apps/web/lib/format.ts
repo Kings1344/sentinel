@@ -1,6 +1,8 @@
 import { formatNear } from "@sentinel/engine";
 
 export const near = (yocto: string | bigint, decimals = 4) => `${formatNear(yocto, decimals)} NEAR`;
+/** Compact amount for lists: "0.1 NEAR". */
+export const formatNearShort = (yocto: string | bigint) => `${formatNear(yocto, 3)} NEAR`;
 export const short = (s: string, n = 8) => (s.length > n * 2 + 1 ? `${s.slice(0, n)}…${s.slice(-4)}` : s);
 
 export function ago(ms: string | number): string {
@@ -23,7 +25,7 @@ export function dur(ms: number): string {
 }
 
 export const REASON_TEXT: Record<string, string> = {
-  Authorized: "Matches the owner's capsule",
+  Authorized: "Matches your capsule",
   OwnerApproved: "Approved by the owner",
   VaultFrozen: "Vault frozen",
   AgentSuspended: "Agent suspended",

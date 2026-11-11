@@ -1,54 +1,72 @@
 @import "tailwindcss";
 
-/* Sentinel command centre tokens: midnight navy ground, charcoal surfaces, semantic emerald/red/amber. */
+/*
+ * Sentinel design tokens.
+ * Ground: deep midnight navy. Surfaces: navy-charcoal with hairline borders and soft depth.
+ * Semantic: emerald = approved, red = blocked, amber = warning. Indigo = interactive.
+ */
 @theme {
-  --color-ink: #0a1122;
-  --color-panel: #171b24;
-  --color-raised: #20252f;
-  --color-line: #2c3340;
-  --color-fg: #eceff5;
-  --color-dim: #9aa3b4;
-  --color-faint: #687183;
-  --color-signal: #4b8bff;
+  --color-ink: #060a14;
+  --color-sidebar: #080d19;
+  --color-panel: #0c1220;
+  --color-raised: #121a2b;
+  --color-hover: #172036;
+  --color-line: #1b2438;
+  --color-line-strong: #283350;
+  --color-fg: #e8ecf4;
+  --color-dim: #96a1b7;
+  --color-faint: #67728b;
+  --color-signal: #6383ff;
+  --color-link: #93aefc;
   --color-pass: #10b981;
-  --color-block: #f05252;
-  --color-hold: #f5a524;
+  --color-block: #f04444;
+  --color-hold: #f59e0b;
   --font-sans: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-code), ui-monospace, SFMono-Regular, monospace;
 }
 
 html { background: var(--color-ink); color: var(--color-fg); color-scheme: dark; }
-body {
-  -webkit-font-smoothing: antialiased;
-  background:
-    radial-gradient(1200px 600px at 80% -10%, color-mix(in oklab, var(--color-signal) 7%, transparent), transparent 60%),
-    var(--color-ink);
-  background-attachment: fixed;
-}
+body { -webkit-font-smoothing: antialiased; font-size: 14px; line-height: 1.55; }
 ::selection { background: color-mix(in oklab, var(--color-signal) 40%, transparent); }
-:focus-visible { outline: 2px solid var(--color-signal); outline-offset: 2px; border-radius: 6px; }
+:focus-visible { outline: 2px solid var(--color-signal); outline-offset: 2px; border-radius: 8px; }
 
+/* Surfaces: one radius family (14 / 10 / 8 / 6), hairline border, layered soft shadow. */
+.surface {
+  background: var(--color-panel);
+  border: 1px solid var(--color-line);
+  border-radius: 14px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.035),
+    0 1px 2px rgb(0 0 0 / 0.35),
+    0 16px 40px -24px rgb(0 0 0 / 0.7);
+}
+.surface-raised {
+  background: var(--color-raised);
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+}
 .tabular { font-variant-numeric: tabular-nums; }
 
-/* Intent diff: mismatched rows flash once when a result arrives. */
-@keyframes diff-flag { from { background-color: color-mix(in oklab, var(--color-block) 35%, transparent); } }
+/* Motion: only in response to the user, plus the live heartbeat and the attack-lab playback. */
+@keyframes diff-flag { from { background-color: color-mix(in oklab, var(--color-block) 30%, transparent); } }
 .diff-flag { animation: diff-flag 900ms ease-out both; }
-
-/* Attack Lab: each check resolves into place. */
-@keyframes check-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-.check-in { animation: check-in 220ms ease-out both; }
-
-/* Live monitor heartbeat. */
-@keyframes live-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-pass) 60%, transparent); } 70% { box-shadow: 0 0 0 7px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
-.live-dot { animation: live-pulse 2s ease-out infinite; }
-
+@keyframes rise-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.rise-in { animation: rise-in 240ms cubic-bezier(.2,.7,.2,1) both; }
+@keyframes live-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-pass) 55%, transparent); } 70% { box-shadow: 0 0 0 6px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+.live-dot { animation: live-pulse 2.2s ease-out infinite; }
 @keyframes shimmer { 100% { transform: translateX(100%); } }
 .skeleton { position: relative; overflow: hidden; background: var(--color-raised); }
-.skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--color-fg) 6%, transparent), transparent); animation: shimmer 1.4s infinite; }
-
-@keyframes dialog-in { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
-.dialog-in { animation: dialog-in 160ms ease-out both; }
+.skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.04), transparent); animation: shimmer 1.5s infinite; }
+@keyframes dialog-in { from { opacity: 0; transform: translateY(6px) scale(0.985); } to { opacity: 1; transform: none; } }
+.dialog-in { animation: dialog-in 170ms cubic-bezier(.2,.7,.2,1) both; }
+@keyframes fade-in { from { opacity: 0; } }
+.fade-in { animation: fade-in 150ms ease-out both; }
+@keyframes drawer-in { from { transform: translateX(-100%); } }
+.drawer-in { animation: drawer-in 200ms cubic-bezier(.2,.7,.2,1) both; }
 
 @media (prefers-reduced-motion: reduce) {
-  .diff-flag, .check-in, .live-dot, .dialog-in, .skeleton::after { animation: none; }
+  .diff-flag, .rise-in, .live-dot, .dialog-in, .fade-in, .drawer-in, .skeleton::after { animation: none; }
 }
+
+/* Thin, quiet scrollbars inside panels. */
+.scroll-quiet { scrollbar-width: thin; scrollbar-color: var(--color-line-strong) transparent; }
