@@ -434,3 +434,106 @@ fn fmt_near_matches_engine() {
     assert_eq!(fmt_near(NEAR / 10), "0.1 NEAR");
     assert_eq!(fmt_near(1), "0.000000000000000000000001 NEAR");
 }
+
+// ------------------------------------------------ audit regressions
+
+/// Audit finding H-1: a compromised agent must not be able to inflate contract storage
+/// (which is paid from the same balance that holds vault funds) with oversized strings.
+#[test]
+fn oversized_agent_strings_are_clipped_before_storage() {
+    let mut v = setup();
+    let huge = "a".repeat(5_000);
+    let mut r = req(1, &format!("{}.testnet", huge), NEAR);
+    r.operation = huge.clone();
+    r.asset = huge.clone();
+    r.memo = Some(huge.clone());
+    let e = as_agent(&mut v, r, T0 + 1).unwrap();
+    assert_eq!(e.decision, Decision::Blocked);
+    assert!(e.explanation.len() <= MAX_EXPLANATION_BYTES + 32);
+    assert!(e.checks.iter().all(|c| c.detail.len() <= MAX_DETAIL_BYTES + 32));
+    let stored = v.get_request(e.request_id).unwrap();
+    assert!(stored.recipient.len() <= MAX_FIELD_BYTES + 32, "recipient stored at {} bytes", stored.recipient.len());
+    assert!(stored.operation.len() <= MAX_FIELD_BYTES + 32);
+    assert!(stored.asset.len() <= MAX_FIELD_BYTES + 32);
+    assert!(stored.memo.unwrap().len() <= MAX_MEMO_BYTES + 32);
+    assert!(stored.explanation.len() <= MAX_EXPLANATION_BYTES + 32);
+    assert!(v.get_audit(Some(1))[0].detail.len() <= MAX_EXPLANATION_BYTES + 32);
+}
+
+#[test]
+fn clipping_never_turns_a_mismatch_into_a_match() {
+    let mut v = setup();
+    // Authorized recipient followed by padding must still be a different recipient.
+    let padded = format!("vendor.testnet{}", "x".repeat(200));
+    let e = as_agent(&mut v, req(1, &padded, NEAR), T0 + 1).unwrap();
+    assert_eq!(e.reason, ReasonCode::RecipientMismatch);
+}
+
+#[test]
+fn clip_respects_utf8_boundaries() {
+    let s = "é".repeat(100); // 2 bytes per char
+    let c = clip(&s, 65);
+    assert!(c.starts_with(&"é".repeat(32)));
+    assert_eq!(clip("short", 64), "short");
+}
+
+/// Boundary checks the attack scenarios rely on.
+/// One vault per test: the mocked blockchain keeps storage for the whole test thread,
+/// so calling setup() twice in one test would re-register the same agent.
+#[test]
+fn exact_limits_are_inclusive_and_one_yocto_over_is_blocked() {
+    let mut v = setup();
+    assert!(as_agent(&mut v, req(1, "vendor.testnet", 3 * NEAR), T0 + 1).is_none(), "exactly the per-tx limit is allowed");
+    let e = as_agent(&mut v, req(2, "vendor.testnet", 3 * NEAR + 1), T0 + 2).unwrap();
+    assert_eq!(e.reason, ReasonCode::AmountExceedsTxLimit);
+}
+
+#[test]
+fn request_at_exact_expiry_instant_is_expired() {
+    let mut v = setup();
+    let e = as_agent(&mut v, req(1, "vendor.testnet", NEAR), T0 + 86_400_000).unwrap();
+    assert_eq!(e.reason, ReasonCode::CapsuleExpired);
+}
+
+#[test]
+fn lookalike_recipients_are_blocked() {
+    let mut v = setup();
+    let fakes = ["Vendor.testnet", "vendor.testnet ", "vеndor.testnet" /* Cyrillic e */, "vendor.testnet.evil.testnet"];
+    for (i, fake) in fakes.iter().enumerate() {
+        // Each blocked attempt consumes its nonce, so the next attempt uses the next one.
+        let e = as_agent(&mut v, req(i as u64 + 1, fake, NEAR), T0 + 1 + i as u64).unwrap();
+        assert_eq!(e.reason, ReasonCode::RecipientMismatch, "{fake}");
+    }
+    assert_eq!(v.get_overview().vault_balance.0, 10 * NEAR, "no funds moved");
+}
+
+#[test]
+#[should_panic(expected = "only the owner")]
+fn agent_cannot_resolve_its_own_review() {
+    let mut v = setup();
+    ctx("owner.testnet", 1, T0);
+    v.create_capsule(input(3 * NEAR, 3 * NEAR, Some(NEAR / 2), T0 + 86_400_000));
+    let mut r = req(1, "vendor.testnet", NEAR);
+    r.capsule_id = 2;
+    let e = as_agent(&mut v, r, T0 + 1).unwrap();
+    ctx("agent.testnet", 1, T0 + 2);
+    let _ = v.resolve_review(e.request_id, true);
+}
+
+#[test]
+#[should_panic(expected = "only the owner")]
+fn agent_cannot_withdraw() {
+    let mut v = setup();
+    ctx("agent.testnet", 1, T0 + 1);
+    let _ = v.withdraw(U128(NEAR));
+}
+
+#[test]
+#[should_panic(expected = "only the owner")]
+fn agent_cannot_reinstate_itself() {
+    let mut v = setup();
+    ctx("owner.testnet", 0, T0 + 1);
+    v.revoke_agent(acc("agent.testnet"));
+    ctx("agent.testnet", 1, T0 + 2);
+    v.reinstate_agent(acc("agent.testnet"));
+}

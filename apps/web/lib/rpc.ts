@@ -15,17 +15,23 @@ export function fromBase64(b64: string): string {
 
 export async function viewCall<T>(method: string, args: Record<string, unknown> = {}, contractId = CONTRACT_ID): Promise<T> {
   if (!contractId) throw new Error("NEXT_PUBLIC_CONTRACT_ID is not set. Deploy the contract and add it to .env.local.");
+  // A hung RPC node must not freeze the page or a serverless function: give up after 10 s.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10_000);
   const res = await fetch(RPC_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     cache: "no-store",
+    signal: controller.signal,
     body: JSON.stringify({
       jsonrpc: "2.0",
       id: "sentinel",
       method: "query",
       params: { request_type: "call_function", finality: "optimistic", account_id: contractId, method_name: method, args_base64: toBase64(JSON.stringify(args)) },
     }),
-  });
+  }).catch((e) => {
+    throw new Error(e?.name === "AbortError" ? "The NEAR RPC did not respond within 10 seconds." : `Can't reach the NEAR RPC: ${e?.message ?? e}`);
+  }).finally(() => clearTimeout(timer));
   if (!res.ok) throw new Error(`RPC ${res.status}: ${res.statusText}`);
   const json = await res.json();
   if (json.error) throw new Error(json.error.data ?? json.error.message ?? "RPC error");

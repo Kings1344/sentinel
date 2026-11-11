@@ -25,7 +25,12 @@ pub const MAX_CAPSULE_TTL_MS: u64 = 30 * 24 * 60 * 60 * 1000;
 pub const AUDIT_CAPACITY: u64 = 500;
 pub const REQUEST_CAPACITY: u64 = 500;
 pub const MAX_PAGE: u64 = 100;
-const GAS_FOR_CALLBACK: Gas = Gas::from_tgas(15);
+/// Untrusted agent strings are stored and logged clipped to these sizes (storage-amplification guard).
+pub const MAX_FIELD_BYTES: usize = 64;
+pub const MAX_EXPLANATION_BYTES: usize = 600;
+pub const MAX_DETAIL_BYTES: usize = 300;
+/// Settlement callback budget. Generous on purpose: a callback that runs out of gas would leave funds reserved.
+const GAS_FOR_CALLBACK: Gas = Gas::from_tgas(25);
 const EVENT_STANDARD: &str = "sentinel";
 const EVENT_VERSION: &str = "1.0.0";
 
@@ -515,6 +520,19 @@ impl SentinelVault {
             }
         }
 
+        // Everything below is stored or logged. The agent controls these strings, so clip them:
+        // evaluation above already ran on the original values, and transfers use the capsule's recipient.
+        let stored_operation = clip(&request.operation, MAX_FIELD_BYTES);
+        let stored_asset = clip(&request.asset, MAX_FIELD_BYTES);
+        let stored_recipient = clip(&request.recipient, MAX_FIELD_BYTES);
+        let stored_memo = request.memo.as_ref().map(|m| clip(m, MAX_MEMO_BYTES));
+        let explanation = clip(&verdict.explanation, MAX_EXPLANATION_BYTES);
+        let checks: Vec<Check> = verdict
+            .checks
+            .into_iter()
+            .map(|c| Check { detail: clip(&c.detail, MAX_DETAIL_BYTES), ..c })
+            .collect();
+
         let request_id = self.request_count + 1;
         self.request_count = request_id;
         let amount = request.amount.0;
@@ -549,14 +567,14 @@ impl SentinelVault {
             capsule_id: request.capsule_id,
             agent_id: caller.clone(),
             nonce: U64(request.nonce),
-            operation: request.operation.clone(),
-            asset: request.asset.clone(),
-            recipient: request.recipient.clone(),
+            operation: stored_operation.clone(),
+            asset: stored_asset.clone(),
+            recipient: stored_recipient.clone(),
             amount: request.amount,
-            memo: request.memo.clone(),
+            memo: stored_memo.clone(),
             decision: verdict.decision,
             reason: verdict.reason,
-            explanation: verdict.explanation.clone(),
+            explanation: explanation.clone(),
             status,
             created_at_ms: U64(now),
             block_height: U64(env::block_height()),
@@ -573,21 +591,21 @@ impl SentinelVault {
             Decision::RequiresHumanReview => "request_held",
             _ => "request_blocked",
         };
-        self.record(kind, Some(request.capsule_id), Some(request_id), verdict.explanation.clone());
+        self.record(kind, Some(request.capsule_id), Some(request_id), explanation.clone());
 
         let evaluation = Evaluation {
             request_id,
             decision: verdict.decision,
             reason: verdict.reason,
-            explanation: verdict.explanation,
+            explanation,
             status,
-            checks: verdict.checks,
+            checks,
         };
         emit(
             "request_evaluated",
             json!({ "evaluation": evaluation, "agent_id": caller, "capsule_id": request.capsule_id, "proposed": {
-                "nonce": request.nonce.to_string(), "operation": request.operation, "asset": request.asset,
-                "recipient": request.recipient, "amount": request.amount, "memo": request.memo } }),
+                "nonce": request.nonce.to_string(), "operation": stored_operation, "asset": stored_asset,
+                "recipient": stored_recipient, "amount": request.amount, "memo": stored_memo } }),
         );
 
         if verdict.decision == Decision::Approved {
@@ -1126,6 +1144,18 @@ fn finish(failure: Option<(Decision, ReasonCode, String)>, checks: Vec<Check>, r
 pub fn commitment_hex(payload: &CommitmentPayload) -> String {
     let bytes = serde_json::to_vec(payload).expect("serializable");
     to_hex(&env::sha256(&bytes))
+}
+
+/// Clip an untrusted string to `max` bytes on a char boundary, noting the original size.
+pub fn clip(s: &str, max: usize) -> String {
+    if s.len() <= max {
+        return s.to_string();
+    }
+    let mut end = max;
+    while !s.is_char_boundary(end) {
+        end -= 1;
+    }
+    format!("{}… ({} bytes)", &s[..end], s.len())
 }
 
 pub fn to_hex(bytes: &[u8]) -> String {

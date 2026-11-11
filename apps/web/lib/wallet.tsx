@@ -64,6 +64,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         receiverId: CONTRACT_ID,
         actions: [{ type: "FunctionCall", params: { methodName: method, args, gas, deposit: depositYocto } }],
       });
+      // Some wallets return a failed outcome instead of throwing. Never report a failure as confirmed.
+      const failure = (outcome as { status?: { Failure?: unknown } } | undefined)?.status?.Failure;
+      if (failure) {
+        const raw = JSON.stringify(failure);
+        const panic = raw.match(/Smart contract panicked: ([^"\\]+)/)?.[1];
+        throw new Error(panic ?? "The transaction failed on-chain.");
+      }
       // Redirect-based wallets return nothing; the page reloads after approval.
       return { hash: extractTxHash(outcome), value: extractReturn<T>(outcome), outcome };
     },

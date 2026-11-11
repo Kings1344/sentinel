@@ -10,6 +10,9 @@ import { AGENT_ACCOUNT_ID, agentConfigured, submitAsAgent } from "@/lib/server/a
 import { llmConfigured, proposeWithLlm } from "@/lib/server/llm";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+// An on-chain run waits for NEAR to finalize the agent's transaction (usually 2-6 s).
+export const maxDuration = 60;
 
 const Body = z.object({
   scenario: z.enum(SCENARIOS.map((s) => s.id) as [ScenarioId, ...ScenarioId[]]),
@@ -20,14 +23,14 @@ const Body = z.object({
   useLlm: z.boolean().default(false),
 });
 
-// Simple per-IP limiter: the route spends the agent account's gas.
+// Per-IP limiter (per serverless instance, best effort): the route spends the agent key's gas allowance.
 const hits = new Map<string, number[]>();
 function limited(ip: string) {
   const now = Date.now();
   const recent = (hits.get(ip) ?? []).filter((t) => now - t < 60_000);
   recent.push(now);
   hits.set(ip, recent);
-  return recent.length > 20;
+  return recent.length > 10;
 }
 
 export async function POST(req: NextRequest) {

@@ -1,6 +1,6 @@
 "use client";
 /** Live contract state. The contract is the source of truth; this only reads and re-polls it. */
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { Agent, AuditEvent, Capsule, Overview, RequestRecord, RiskEvent } from "@sentinel/engine";
 import { analyzeRisk } from "@sentinel/engine";
 import { viewCall } from "./rpc";
@@ -30,11 +30,14 @@ export function VaultProvider({ children }: { children: ReactNode }) {
     overview: null, agents: [], capsules: [], requests: [], audit: [], loading: true, error: null, updatedAt: null,
   });
 
+  const inFlight = useRef(false);
   const refresh = useCallback(async () => {
+    if (inFlight.current) return; // never stack polls on a slow RPC
     if (!isConfigured()) {
       setS((p) => ({ ...p, loading: false, error: "No contract configured. Set NEXT_PUBLIC_CONTRACT_ID in apps/web/.env.local." }));
       return;
     }
+    inFlight.current = true;
     try {
       const [overview, agents, capsules, requests, audit] = await Promise.all([
         viewCall<Overview>("get_overview"),
@@ -45,7 +48,10 @@ export function VaultProvider({ children }: { children: ReactNode }) {
       ]);
       setS({ overview, agents, capsules, requests, audit, loading: false, error: null, updatedAt: Date.now() });
     } catch (e) {
+      // Keep the last good data on screen; only flag the error.
       setS((p) => ({ ...p, loading: false, error: e instanceof Error ? e.message : String(e) }));
+    } finally {
+      inFlight.current = false;
     }
   }, []);
 
@@ -53,8 +59,11 @@ export function VaultProvider({ children }: { children: ReactNode }) {
     refresh();
     let seconds = 8;
     try { seconds = Math.max(3, Number(localStorage.getItem(POLL_KEY) ?? 8)); } catch {}
-    const id = setInterval(refresh, seconds * 1000);
-    return () => clearInterval(id);
+    // Don't poll the RPC from background tabs; catch up as soon as the tab is visible again.
+    const id = setInterval(() => { if (!document.hidden) refresh(); }, seconds * 1000);
+    const onVisible = () => { if (!document.hidden) refresh(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => { clearInterval(id); document.removeEventListener("visibilitychange", onVisible); };
   }, [refresh]);
 
   const risk = useMemo(() => analyzeRisk(s.requests, s.agents), [s.requests, s.agents]);
