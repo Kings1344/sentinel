@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import {
-  Activity, Bot, CheckCircle2, Copy, ExternalLink, FileLock2, FlaskConical, LayoutGrid, LogOut, Menu, OctagonX, Radar,
+  Activity, Bot, CheckCircle2, Copy, ExternalLink, Eye, FileLock2, FlaskConical, LayoutGrid, Loader2, LogOut, Menu, OctagonX, Radar,
   Settings, ShieldCheck, Snowflake, UserCheck, Wallet, X, XCircle,
 } from "lucide-react";
 import { WalletProvider, useWallet, type CallResult } from "@/lib/wallet";
@@ -227,11 +227,72 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
+const DEMO_KEY = "sentinel.viewDemo";
+
+/** First screen for a new visitor: nothing about the vault is shown until they choose how to enter. */
+function Welcome({ onDemo }: { onDemo: () => void }) {
+  const { signIn, ready } = useWallet();
+  return (
+    <div className="grid min-h-screen place-items-center px-5 py-10">
+      <div className="surface w-full max-w-[520px] p-8 text-center sm:p-10">
+        <span className="mx-auto grid size-14 place-items-center rounded-2xl border border-pass/30 bg-pass/10"><ShieldCheck className="size-7 text-[#34d399]" /></span>
+        <h1 className="mt-6 text-[28px] leading-tight font-semibold tracking-[-0.025em]">Welcome to Sentinel</h1>
+        <p className="mt-3 text-[15px] leading-relaxed text-dim">Connect your NEAR wallet to manage a vault, or look around the public demo vault first.</p>
+        <div className="mt-8 space-y-3">
+          <Button variant="primary" size="lg" className="w-full" onClick={signIn} disabled={!ready}><Wallet className="size-4" />Connect wallet</Button>
+          <Button size="lg" className="w-full" onClick={onDemo}><Eye className="size-4" />View the live demo vault</Button>
+        </div>
+        <p className="mt-6 text-[13px] leading-relaxed text-faint">The demo vault runs on NEAR Testnet. Its balance and history are public on-chain records, shown read-only. Only its owner can change anything.</p>
+        <Link href="/" className="mt-5 inline-block text-[13px] font-medium text-link hover:underline">Back to home</Link>
+      </div>
+    </div>
+  );
+}
+
+/** Tells a visitor whose vault they are looking at, and that they cannot change it. */
+function ViewerBanner({ onExit }: { onExit?: () => void }) {
+  const { accountId, signIn } = useWallet();
+  const { overview, isOwner } = useVault();
+  if (isOwner || !overview) return null;
+  return (
+    <div className="mb-8 flex flex-wrap items-center gap-x-4 gap-y-3 rounded-[14px] border border-signal/30 bg-signal/[0.07] px-5 py-4">
+      <span className="grid size-9 shrink-0 place-items-center rounded-full border border-signal/30 bg-signal/10 text-link"><Eye className="size-4" /></span>
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-medium">You're viewing the public demo vault, read-only</div>
+        <div className="text-[13px] leading-relaxed text-dim">
+          It belongs to <Mono>{overview.owner}</Mono>. These are its real on-chain records, not yours.
+          {accountId ? <> You're signed in as <Mono>{accountId}</Mono>, so you can look and run simulations, but only the owner can change it.</> : " You can look around and run simulations."}
+        </div>
+      </div>
+      <div className="flex gap-2">
+        {!accountId && <Button size="sm" variant="primary" onClick={signIn}>Connect wallet</Button>}
+        {onExit && !accountId && <Button size="sm" variant="ghost" onClick={onExit}>Exit demo</Button>}
+      </div>
+    </div>
+  );
+}
+
 function Shell({ children }: { children: ReactNode }) {
   const path = usePathname();
+  const { accountId, ready } = useWallet();
   const [drawer, setDrawer] = useState(false);
+  const [demo, setDemo] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
   const current = ALL.find((n) => (n.href === "/console" ? path === n.href : path.startsWith(n.href)));
   useEffect(() => { setDrawer(false); }, [path]);
+  useEffect(() => {
+    try { setDemo(sessionStorage.getItem(DEMO_KEY) === "1"); } catch {}
+    setHydrated(true);
+  }, []);
+  const enterDemo = () => { try { sessionStorage.setItem(DEMO_KEY, "1"); } catch {} setDemo(true); };
+  const exitDemo = () => { try { sessionStorage.removeItem(DEMO_KEY); } catch {} setDemo(false); };
+
+  // Wait for the wallet to load so a returning owner never sees the welcome screen flash.
+  if (!hydrated || (!ready && !demo)) {
+    return <div className="grid min-h-screen place-items-center text-dim"><span className="flex items-center gap-3 text-sm"><Loader2 className="size-5 animate-spin" aria-hidden />Loading Sentinel…</span></div>;
+  }
+  // A new visitor sees nothing about any vault until they connect or choose the demo.
+  if (!accountId && !demo) return <Welcome onDemo={enterDemo} />;
 
   return (
     <div className="min-h-screen lg:pl-[264px]">
@@ -259,6 +320,7 @@ function Shell({ children }: { children: ReactNode }) {
       </header>
       <main className="mx-auto max-w-[1240px] px-4 pt-8 pb-16 sm:px-6 lg:px-10 lg:pt-10">
         <div className="mb-6 xl:hidden"><SyncStatus /></div>
+        <ViewerBanner onExit={exitDemo} />
         {children}
       </main>
     </div>
