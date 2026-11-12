@@ -191,7 +191,7 @@ Fixes made in this audit:
 | Security headers | nosniff, Referrer-Policy, X-Frame-Options DENY, Permissions-Policy. No CSP (**L-2 · LOW**). |
 | Public agent route (**M-3**) | Anyone can press "Run on-chain". This spends the agent key's 1 NEAR gas allowance and can only pay what the active capsule allows, to its recipient. **L-8 · LOW**: when the allowance runs out, on-chain runs stop until you add a new key. |
 | Contract configuration | Owner `oxchimaobi2026-owner.testnet`. The agent was revoked during testing; on-chain runs need a reinstated agent and an active capsule. |
-| Repository README | **L-10 · LOW**: the copy on GitHub is the earliest version ("not deployed", no proof table). Replace it with the final README. |
+| Repository README | **L-10 · LOW**: the copy on GitHub was the earliest version. Fixed: replaced with the final README (live link, proof table). |
 | Sandbox tests | Removed locally because `near-workspaces` doesn't run on Windows. End-to-end async coverage now relies on testnet only (**H-2**). |
 | Key custody | **M-4 · MEDIUM**: single owner; owner key stored in plaintext in `~/.near-credentials` and in the Meteor extension. Acceptable on testnet, not for real funds. |
 
@@ -218,40 +218,24 @@ Fixes made in this audit:
 | L-7 | LOW | Request records older than the newest 500 are pruned | By design, documented |
 | L-8 | LOW | Agent gas allowance will run out on a public site | Monitor |
 | L-9 | LOW | Engine/contract explanation text parity not tested (decisions and reasons are) | Unresolved |
-| L-10 | LOW | Outdated README on GitHub | Your action |
+| L-10 | LOW | Outdated README on GitHub | Fixed |
 
-## 9. Actions you must perform
+## 9. Actions after the audit
 
-In order. Steps 3–4 change the live contract: only do them once you're happy with the tests.
+Done (verified by the owner during this audit):
 
-1. **Install the audit changes.** Copy the files from `sentinel-audit-fixes.zip` into your project, replacing existing files. It does not touch your `layout.tsx`, `globals.css`, `Cargo.toml` or `.env.local`.
-2. **Run the tests:**
-   - `npm test`: expect **53 passed**.
-   - `npm run test:contract`: expect **42 passed** (33 original + 9 new). If any fail, stop and send the output.
-3. **Rebuild the contract:**
-   ```
-   cd contracts/sentinel-vault
-   cargo near build non-reproducible-wasm --no-abi
-   ```
-4. **Upgrade the live contract** (code only; existing state is kept because the storage layout did not change). From the same folder:
-   ```
-   near contract deploy oxchimaobi2026-vault.testnet use-file target\near\sentinel_vault.wasm without-init-call network-config testnet sign-with-legacy-keychain send
-   ```
-   Then confirm the state survived:
-   ```
-   near contract call-function as-read-only oxchimaobi2026-vault.testnet get_overview json-args {} network-config testnet now
-   ```
-   Expect the same owner, `request_count` 8, `blocked_total` 7.
-5. **Ship the web fixes:** from the main folder run `npm run build` (must pass), then `git add .`, `git commit -m "Audit fixes"` and `git push`. Vercel redeploys automatically.
-6. **Replace `README.md`** with the final version (live link + proof table), commit and push.
-7. **Verify the live site:** open https://sentinel-vaults.vercel.app/console. You should see 8 requests. Connect Meteor and confirm it shows **Owner**.
-8. **Verify the transactions yourself:** open each of the 8 explorer links in section 2 and check that the receiver is the vault and the method is `request_transfer`.
-9. **Prepare for judges:**
-   - Reinstate the agent.
-   - Create a capsule with 30-day expiry and small limits (0.05 per payment, 0.5 total).
-   - Run one authorized payment and one attack on the live site.
-10. **Keep a storage surplus:** compare `contract_balance` and `vault_balance` in `get_overview`. Keep at least 3 NEAR more on the account than the vault ledger.
-11. **Before real funds (after the hackathon):** remove or govern the vault's full-access key (C-1); run the sandbox tests on Linux or macOS (H-2); get an external audit.
+1. Installed the audit fixes; `npm test` 53/53 and `cargo +stable test --lib` 42/42 passing.
+2. Rebuilt the contract (`cargo near build non-reproducible-wasm --no-abi`) and upgraded the live contract in place with `without-init-call` (transaction `CwgX1tbicw343uZPxJmnQ56EU6DCYnPwUb6PLNwqUQba`). `get_overview` afterwards showed the same owner and all prior state.
+3. `npm run build` passing; pushed to GitHub, so Vercel redeployed the web fixes.
+4. Replaced the outdated README with the version containing the live link and proof table (L-10).
+5. Added a welcome screen and a read-only banner so visitors don't mistake the demo vault's public records for their own.
+
+Still open:
+
+6. **Verify the transactions yourself:** open each explorer link in section 2 and check that the receiver is the vault and the method is `request_transfer`.
+7. **Keep the demo usable for judges:** keep the agent active with a 30-day capsule and small limits, and top up the agent key's allowance if on-chain runs start failing (L-8).
+8. **Keep a storage surplus:** at least 3 NEAR more on the vault account than `vault_balance` (M-1).
+9. **Before real funds (after the hackathon):** remove or govern the vault's full-access key (C-1); run end-to-end tests on a real NEAR runtime, e.g. `near-workspaces` on Linux or macOS (H-2); get an external audit.
 
 ## 10. Rating
 

@@ -40,7 +40,7 @@ sequenceDiagram
   O->>V: create_capsule(terms, expected_commitment) + 1 yocto
   V-->>O: Capsule {id, commitment}
   A->>V: request_transfer {capsule_id, nonce, operation, asset, recipient, amount}
-  V->>V: evaluate(): 15 checks, first failure decides, nonce consumed
+  V->>V: evaluate(): up to 15 checks, first failure decides, nonce consumed
   alt any check fails
     V-->>A: Evaluation {Blocked | Expired | Revoked, reason, checks}
     Note over V: request + audit stored, NEP-297 event, no funds move
@@ -74,7 +74,7 @@ sequenceDiagram
 
 ## Off-chain parity
 
-`packages/engine/src/verify.ts` mirrors `evaluate()` in the contract: same check names, order, decision mapping and explanation text. It powers previews and the Attack Lab's simulation mode. The commitment format is pinned by a shared test vector asserted in both `packages/engine/test/commitment.test.ts` and `contracts/sentinel-vault/src/tests.rs`.
+`packages/engine/src/verify.ts` mirrors `evaluate()` in the contract: same check names, order and decision mapping, with matching explanation wording. Decisions and reason codes are covered by tests; the exact explanation wording is not. It powers previews and the Attack Lab's simulation mode. The commitment format is pinned by a shared test vector asserted in both `packages/engine/test/commitment.test.ts` and `contracts/sentinel-vault/src/tests.rs`.
 
 ## Why not a backend policy check?
 

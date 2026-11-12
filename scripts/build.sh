@@ -3,5 +3,5 @@
 set -euo pipefail
 cd "$(dirname "$0")/../contracts/sentinel-vault"
 command -v cargo-near >/dev/null || { echo "cargo-near is not installed. See README > Prerequisites."; exit 1; }
-cargo near build non-reproducible-wasm
+cargo near build non-reproducible-wasm --no-abi
 ls -lh target/near/sentinel_vault.wasm

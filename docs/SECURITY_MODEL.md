@@ -55,7 +55,8 @@ All checks are reported; the first failure decides. No LLM output is consulted.
 - **No agent custody.** Funds are in the contract. The agent's key (ideally a function-call key limited to `request_transfer`) cannot move them.
 - **No silent permission expansion.** Only `create_capsule`/`amend_capsule` set terms; both require the owner and 1 yoctoNEAR. Amendments create a new version and revoke the old one.
 - **Replay protection.** Strict per-capsule nonce sequence; blocked attempts consume their nonce; foreign agents cannot advance another agent's nonce.
-- **Correct async accounting.** Reserve before the promise; settle in `on_transfer_complete`; `finalize_transfer` is idempotent (only acts on `PendingTransfer`); failed transfers are refunded and counted as failed, never spent.
+- **Bounded storage from agents.** Agent-supplied strings are clipped before they are stored or logged (fields 64 bytes, memo 256, explanation 600, check details 300). Storage is paid from the same account balance that holds vault funds, so this stops a compromised agent from locking funds as storage stake. Evaluation still runs on the original values.
+- **Correct async accounting.** Reserve before the promise; settle in `on_transfer_complete`; `finalize_transfer` is idempotent (only acts on `PendingTransfer`); failed transfers are refunded and counted as failed, never spent. The settlement callback gets 25 Tgas.
 - **Overflow safety.** `overflow-checks = true` in release; checked additions for cumulative limits; saturating arithmetic in callbacks so they cannot panic.
 - **Fast containment.** Freeze, suspend, revoke work without the 1-yocto confirmation. Revoking an agent revokes all its capsules permanently; reinstating does not restore them.
 - **Emergency exit.** The owner can withdraw unreserved funds while frozen.

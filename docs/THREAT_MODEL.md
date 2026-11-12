@@ -35,7 +35,8 @@
 | Agent uses another agent's capsule | `capsule_bound_to_agent` check; nonce untouched | — |
 | Agent modifies its permissions | Owner-only, 1-yocto capsule methods | — |
 | Double settlement / failed transfer counted as spent | Reserve-then-settle in callback; idempotent finalize; refunds | — |
-| Storage spam by outsiders | Unregistered callers refused before any write | Registered agents can add records; bounded by pruning (500 requests, 500 audit events) and revocation |
+| Storage spam by outsiders | Unregistered callers refused before any write | — |
+| Storage inflation by a compromised agent (oversized strings) | Agent strings clipped before storage and logging; requests pruned beyond 500, audit ring of 500; owner can revoke | Records still cost some storage; keep a NEAR surplus on the vault account |
 | Nonce burning by a compromised agent | Owner revokes agent/capsule | Denial of service on that capsule until revoked |
 | Tampered UI shows benign terms, submits broad ones | Local hash vs contract preview must match; contract enforces `expected_commitment` | A fully compromised browser could fake both; the wallet's own transaction view is the last line |
 | Stolen owner function-call (session) key | Can only tighten (freeze/revoke); loosening needs 1 yocto = full-access confirmation | DoS by freezing |

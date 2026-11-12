@@ -4,9 +4,9 @@ Prep: vault deployed, 1 NEAR deposited, agent registered, one capsule for the ag
 
 **0:00 – The problem (30 s).** Landing page. "Agents read untrusted text. A hijacked agent doesn't drain your wallet, it makes a small payment to the wrong place. This one is under the spending limit." Point at the example intent diff.
 
-**0:30 – The owner's intent (60 s).** Capsules page. Type the instruction, Draft fields, show recipient/limits/expiry. Review capsule: may / may-not lists, commitment, "matches the hash computed in your browser". Sign in the wallet. "The contract now stores exactly this and refuses terms that hash differently."
+**0:30 – The owner's intent (60 s).** Capsules page. Type the instruction, click Turn into permissions, show recipient, limits and expiry. Review capsule: may / may-not lists, commitment, "Both fingerprints match". Sign in the wallet. "The contract now stores exactly this and refuses terms that hash differently."
 
-**1:30 – It works (45 s).** Attack lab, Guided step 1, Run on-chain. Approved, every check green, open the transaction on the explorer, show the vendor received NEAR.
+**1:30 – It works (45 s).** Attack lab, Guided scenarios, step 1, Run on-chain. Approved, every check green, open the transaction on the explorer, show the vendor received NEAR.
 
 **2:15 – The attack (75 s).** Step 2, Prompt injection. Read the injected product page out loud. Run on-chain. The diff flags Asset and Recipient, the decision is Blocked: unauthorized asset. Open the transaction: it succeeded as a transaction, and the contract recorded a refusal. "Under the limit. Still refused, because it isn't what I asked for."
 

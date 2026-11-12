@@ -5,7 +5,8 @@ edition = "2021"
 rust-version = "1.86"
 description = "Sentinel Vault: on-chain intent enforcement for AI agents on NEAR"
 license = "MIT"
-   repository = "https://github.com/Kings1344/sentinel"
+repository = "https://github.com/Kings1344/sentinel"
+
 [lib]
 crate-type = ["cdylib", "rlib"]
 
@@ -14,7 +15,6 @@ near-sdk = "5.6"
 
 [dev-dependencies]
 near-sdk = { version = "5.6", features = ["unit-testing"] }
-
 
 [profile.release]
 codegen-units = 1

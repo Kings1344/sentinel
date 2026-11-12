@@ -1,2 +1,2 @@
-   [resolver]
-   incompatible-rust-versions = "fallback"
+[resolver]
+incompatible-rust-versions = "fallback"

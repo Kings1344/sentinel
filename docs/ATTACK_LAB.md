@@ -4,8 +4,8 @@ The Attack Lab takes a real capsule, adds scripted untrusted content (a web page
 
 Two modes:
 
-- **Guided demo:** the scenarios below in order, each with its precondition shown.
-- **Interactive:** pick a scenario, edit the owner task and the untrusted content, run it.
+- **Guided scenarios:** the scenarios below in order, each with its precondition shown.
+- **Write your own attack:** pick a scenario type, edit the owner task and the untrusted content, run it.
 
 Each run shows the owner's instruction, the capsule terms, the untrusted content, the agent's reasoning trace, the intent diff, every check, the decision and the transaction link.
 
@@ -24,10 +24,10 @@ Each run shows the owner's instruction, the capsule terms, the untrusted content
 
 Run #8 last: revocation is permanent for the agent's capsules. Reinstate the agent and create a new capsule to continue.
 
-Every expected result above is asserted for the off-chain engine in `packages/engine/test/scenarios.test.ts`, and the equivalent contract behaviour in `contracts/sentinel-vault/src/tests.rs` and `tests/sandbox.rs`.
+Every expected result above is asserted for the off-chain engine in `packages/engine/test/scenarios.test.ts`, and the equivalent contract behaviour in `contracts/sentinel-vault/src/tests.rs`. Scenarios 1–8 were also run against the deployed contract; see the transaction table in the README.
 
 ## Write your own injection
 
-In Interactive mode, edit the untrusted content. The agent reads amounts (`2 NEAR`), accounts (`to x.testnet`), assets (`buy TOKEN`) and operations (`call ft_transfer`). Try to make it pay someone else, in any wording. The contract only accepts the capsule's terms.
+In **Write your own attack** mode, edit the untrusted content. The agent reads amounts (`2 NEAR`), accounts (`to x.testnet`), assets (`buy TOKEN`) and operations (`call ft_transfer`). Try to make it pay someone else, in any wording. The contract only accepts the capsule's terms.
 
-With `ANTHROPIC_API_KEY` set, tick "Let the LLM agent build the proposal". The LLM proposes recipient, amount, asset and operation; the server fixes the capsule id and nonce; the contract decides.
+Optional and untested in the deployment: with `ANTHROPIC_API_KEY` set on the server, a **Use the LLM agent** switch appears in Write your own attack mode. The LLM proposes recipient, amount, asset and operation; the server fixes the capsule id and nonce; the contract decides.
