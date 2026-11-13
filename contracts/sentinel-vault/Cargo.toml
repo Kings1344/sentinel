@@ -3,7 +3,7 @@ name = "sentinel-vault"
 version = "1.0.0"
 edition = "2021"
 rust-version = "1.86"
-description = "Sentinel Vault: on-chain intent enforcement for AI agents on NEAR"
+description = "TrustVault: on-chain intent enforcement for AI agents on NEAR"
 license = "MIT"
 repository = "https://github.com/Kings1344/sentinel"
 

@@ -1,4 +1,4 @@
-//! Sentinel Vault — on-chain intent enforcement for AI agents.
+//! TrustVault — on-chain intent enforcement for AI agents.
 //!
 //! One deployment = one owner's vault holding native NEAR. The owner commits Intent Capsules
 //! (what a specific agent may pay, to whom, how much, until when). Registered agents can only

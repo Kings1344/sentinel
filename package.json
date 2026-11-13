@@ -1,5 +1,6 @@
 {
   "name": "sentinel",
+  "description": "TrustVault: on-chain intent security for AI agents on NEAR",
   "private": true,
   "workspaces": [
     "apps/*",
