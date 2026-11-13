@@ -1,6 +1,6 @@
 # Deployment
 
-The live deployment is `oxchimaobi2026-vault.testnet` (contract) and https://sentinel-vaults.vercel.app (web). It was built and deployed from **Windows PowerShell** with the commands in section A, which are the ones actually run. Section B is the same flow for macOS/Linux using the bash helpers in `scripts/`. Those scripts follow the same commands but were not used for the live deployment.
+The live deployment is `oxchimaobi2026-vault.testnet` (contract) and https://trustvault-nearhack.vercel.app (web). It was built and deployed from **Windows PowerShell** with the commands in section A, which are the ones actually run. Section B is the same flow for macOS/Linux using the bash helpers in `scripts/`. Those scripts follow the same commands but were not used for the live deployment.
 
 ## Tools
 

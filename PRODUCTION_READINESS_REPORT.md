@@ -1,6 +1,6 @@
 # TrustVault: Production Readiness Report
 
-Audit date: 2026-11-11 · Scope: entire repository (`contracts/sentinel-vault`, `packages/engine`, `apps/web`), the deployed testnet contract `oxchimaobi2026-vault.testnet`, and the Vercel deployment `https://sentinel-vaults.vercel.app`.
+Audit date: 2026-11-11 · Scope: entire repository (`contracts/sentinel-vault`, `packages/engine`, `apps/web`), the deployed testnet contract `oxchimaobi2026-vault.testnet`, and the Vercel deployment `https://trustvault-nearhack.vercel.app`.
 
 ## Summary
 

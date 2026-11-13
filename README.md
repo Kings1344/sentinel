@@ -6,7 +6,7 @@ TrustVault is a NEAR smart-contract vault that holds native NEAR for an owner an
 
 Built at NEAR HACKATHON 2026. Track: **AI Security & Defense** (`security`).
 
-**Live demo:** https://sentinel-vaults.vercel.app
+**Live demo:** https://trustvault-nearhack.vercel.app
 
 **Live contract on NEAR Testnet:** [`oxchimaobi2026-vault.testnet`](https://testnet.nearblocks.io/address/oxchimaobi2026-vault.testnet)
 
@@ -94,7 +94,7 @@ PRODUCTION_READINESS_REPORT.md   our own audit: tests run, issues found and fixe
 
 ### A. Use the live site (nothing to install)
 
-1. Open https://sentinel-vaults.vercel.app/console and click **View the live demo vault**.
+1. Open https://trustvault-nearhack.vercel.app/console and click **View the live demo vault**.
 2. **Transactions:** every request the vault has received, with its reason. Open one to see the intent diff (what the owner authorized vs what the agent asked for).
 3. **Security:** incident timeline, agent behaviour and the contract's audit log.
 4. **Attack lab:** pick a scenario and click **Simulate** to watch every check run off-chain. **Run on-chain** submits the scenario to the deployed contract as the demo agent; it works while the demo agent is active and has an active capsule.
@@ -138,7 +138,7 @@ npm run build:contract          # contract wasm: `cargo near build non-reproduci
 | Contract build (`cargo near build non-reproducible-wasm --no-abi`) | Builds (≈287 KB wasm) |
 | Testnet deployment | Live at `oxchimaobi2026-vault.testnet`, upgraded with the audit fix |
 | Production web build (`npm run build`) | Passing: 12 pages, 2 API routes |
-| Public deployment | Live at https://sentinel-vaults.vercel.app (Vercel, root directory `apps/web`) |
+| Public deployment | Live at https://trustvault-nearhack.vercel.app (Vercel, root directory `apps/web`) |
 | Web console against the live contract | Owner wallet (Meteor), deposit, agent registration, capsule creation with commitment check, all 8 Attack Lab scenarios run on-chain (table above) |
 | End-to-end sandbox tests (`near-workspaces`) | Not included: the sandbox does not run on Windows, where this project was built. The live testnet transactions cover the same flows. |
 | Independent security audit | Not done. Our own audit is in PRODUCTION_READINESS_REPORT.md. |
