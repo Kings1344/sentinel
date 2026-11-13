@@ -15,7 +15,7 @@ flowchart LR
     K[Agent function-call key]
   end
   subgraph NEAR["NEAR Testnet"]
-    V[(Sentinel Vault contract)]
+    V[(TrustVault contract)]
     R[Recipient account]
   end
   UI --> ENG1
@@ -78,4 +78,4 @@ sequenceDiagram
 
 ## Why not a backend policy check?
 
-A backend that approves transactions only protects agents that choose to ask it. Sentinel's agent never has custody: the funds are in the contract, so the checks cannot be skipped.
+A backend that approves transactions only protects agents that choose to ask it. TrustVault's agent never has custody: the funds are in the contract, so the checks cannot be skipped.

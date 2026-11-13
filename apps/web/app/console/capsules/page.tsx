@@ -132,7 +132,7 @@ export default function CapsulesPage() {
             <div className="max-w-2xl space-y-6">
               <div>
                 <h2 className="text-lg font-semibold tracking-[-0.01em]">What should the agent do?</h2>
-                <p className="mt-1 text-sm text-dim">Write it the way you'd tell a person. Sentinel turns it into exact permissions you check before anything is signed.</p>
+                <p className="mt-1 text-sm text-dim">Write it the way you'd tell a person. TrustVault turns it into exact permissions you check before anything is signed.</p>
               </div>
               <Textarea value={nl} onChange={(e) => setNl(e.target.value)} maxLength={500} aria-label="Instruction for the agent" />
               <div>

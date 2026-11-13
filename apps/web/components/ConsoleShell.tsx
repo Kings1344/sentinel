@@ -200,7 +200,7 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
     <div className="flex h-full flex-col">
       <Link href="/" onClick={onNavigate} className="flex h-16 items-center gap-2.5 px-6">
         <span className="grid size-8 place-items-center rounded-lg border border-pass/30 bg-pass/10"><ShieldCheck className="size-[18px] text-[#34d399]" /></span>
-        <span className="text-[15px] font-semibold tracking-[-0.01em]">Sentinel</span>
+        <span className="text-[15px] font-semibold tracking-[-0.01em]">TrustVault</span>
         <span className="ml-auto rounded-md border border-line-strong px-1.5 py-0.5 text-[11px] font-medium text-dim">{NETWORK_ID}</span>
       </Link>
       <nav aria-label="Console" className="scroll-quiet flex-1 space-y-6 overflow-y-auto px-6 pt-2">
@@ -236,7 +236,7 @@ function Welcome({ onDemo }: { onDemo: () => void }) {
     <div className="grid min-h-screen place-items-center px-5 py-10">
       <div className="surface w-full max-w-[520px] p-8 text-center sm:p-10">
         <span className="mx-auto grid size-14 place-items-center rounded-2xl border border-pass/30 bg-pass/10"><ShieldCheck className="size-7 text-[#34d399]" /></span>
-        <h1 className="mt-6 text-[28px] leading-tight font-semibold tracking-[-0.025em]">Welcome to Sentinel</h1>
+        <h1 className="mt-6 text-[28px] leading-tight font-semibold tracking-[-0.025em]">Welcome to TrustVault</h1>
         <p className="mt-3 text-[15px] leading-relaxed text-dim">Connect your NEAR wallet to manage a vault, or look around the public demo vault first.</p>
         <div className="mt-8 space-y-3">
           <Button variant="primary" size="lg" className="w-full" onClick={signIn} disabled={!ready}><Wallet className="size-4" />Connect wallet</Button>
@@ -289,7 +289,7 @@ function Shell({ children }: { children: ReactNode }) {
 
   // Wait for the wallet to load so a returning owner never sees the welcome screen flash.
   if (!hydrated || (!ready && !demo)) {
-    return <div className="grid min-h-screen place-items-center text-dim"><span className="flex items-center gap-3 text-sm"><Loader2 className="size-5 animate-spin" aria-hidden />Loading Sentinel…</span></div>;
+    return <div className="grid min-h-screen place-items-center text-dim"><span className="flex items-center gap-3 text-sm"><Loader2 className="size-5 animate-spin" aria-hidden />Loading TrustVault…</span></div>;
   }
   // A new visitor sees nothing about any vault until they connect or choose the demo.
   if (!accountId && !demo) return <Welcome onDemo={enterDemo} />;

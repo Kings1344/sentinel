@@ -14,6 +14,6 @@ Prep: vault deployed, 1 NEAR deposited, agent registered, one capsule for the ag
 
 **4:15 – Containment (30 s).** Step 8: Revoke agent now (wallet confirms instantly, no extra approval needed to tighten), Run on-chain: Revoked. Security page: events, risk score, audit log.
 
-**4:45 – Close (15 s).** "Sentinel doesn't trust the agent, the UI or our server. The vault contract checks every field, every time. Native NEAR today; the capsule model is chain-native and auditable."
+**4:45 – Close (15 s).** "TrustVault doesn't trust the agent, the UI or our server. The vault contract checks every field, every time. Native NEAR today; the capsule model is chain-native and auditable."
 
 Fallback if testnet is slow: run the same steps in Simulate mode (it is labelled as simulation) and show previously recorded transaction hashes.

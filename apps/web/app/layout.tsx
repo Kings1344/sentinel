@@ -4,8 +4,8 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Sentinel — intent security for AI agents on NEAR",
-  description: "Your AI can act. Sentinel makes sure it acts on your instructions.",
+  title: "TrustVault — intent security for AI agents on NEAR",
+  description: "Your AI can act. TrustVault makes sure it acts on your instructions.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

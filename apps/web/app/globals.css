@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
- * Sentinel design tokens.
+ * TrustVault design tokens.
  * Ground: deep midnight navy. Surfaces: navy-charcoal with hairline borders and soft depth.
  * Semantic: emerald = approved, red = blocked, amber = warning. Indigo = interactive.
  */
@@ -21,9 +21,10 @@
   --color-pass: #10b981;
   --color-block: #f04444;
   --color-hold: #f59e0b;
-    --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
 }
+
 html { background: var(--color-ink); color: var(--color-fg); color-scheme: dark; }
 body { -webkit-font-smoothing: antialiased; font-size: 14px; line-height: 1.55; text-rendering: optimizeLegibility; }
 ::selection { background: color-mix(in oklab, var(--color-signal) 40%, transparent); }

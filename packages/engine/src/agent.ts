@@ -4,7 +4,7 @@
  * It stands in for an LLM agent that reads its owner's task AND untrusted external content
  * (a web page, an email, a tool result) and builds a transaction from both. It is deliberately
  * naive: later instructions override earlier ones, which is exactly how prompt injection
- * hijacks real agents. Sentinel does not try to make the agent safe; the contract enforces the
+ * hijacks real agents. TrustVault does not try to make the agent safe; the contract enforces the
  * owner's capsule regardless of what the agent proposes.
  */
 import type { Capsule, TransferRequest } from "./types";
@@ -83,6 +83,6 @@ export function proposeTransaction({ capsule, task, externalContent, nonce }: Ag
     trace.push("Reading external content (untrusted)…");
     apply("External content", interpret(externalContent));
   }
-  trace.push(`Proposal ready with nonce ${nonce}. Submitting to Sentinel.`);
+  trace.push(`Proposal ready with nonce ${nonce}. Submitting to TrustVault.`);
   return { proposal, trace };
 }

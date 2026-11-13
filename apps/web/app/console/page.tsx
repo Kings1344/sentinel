@@ -30,7 +30,7 @@ export default function Overview() {
         title="Security overview"
         action={<Link href="/console/attack-lab" className={buttonStyles()}><FlaskConical className="size-4" />Open attack lab</Link>}
       >
-        Live state of your Sentinel vault on NEAR. Every number here is read from the contract.
+        Live state of your TrustVault on NEAR. Every number here is read from the contract.
       </PageTitle>
 
       {error && <div className="mb-6"><Notice tone="block" title="Can't read the vault right now">{error}</Notice></div>}

@@ -1,4 +1,4 @@
-# Sentinel: Production Readiness Report
+# TrustVault: Production Readiness Report
 
 Audit date: 2026-11-11 · Scope: entire repository (`contracts/sentinel-vault`, `packages/engine`, `apps/web`), the deployed testnet contract `oxchimaobi2026-vault.testnet`, and the Vercel deployment `https://sentinel-vaults.vercel.app`.
 
@@ -6,7 +6,7 @@ Audit date: 2026-11-11 · Scope: entire repository (`contracts/sentinel-vault`, 
 
 **Readiness rating: 58 / 100 for real users with real funds. Not production-ready.** (52 at audit time; raised after the fixes below were tested and deployed.)
 
-For its actual purpose, a NEAR Testnet hackathon demo, Sentinel is in good shape (roughly 84/100): the contract enforces every claimed rule, eight on-chain transactions show it refusing attacks, the production build passes, and the site is deployed.
+For its actual purpose, a NEAR Testnet hackathon demo, TrustVault is in good shape (roughly 84/100): the contract enforces every claimed rule, eight on-chain transactions show it refusing attacks, the production build passes, and the site is deployed.
 
 What keeps it from production:
 
@@ -83,10 +83,10 @@ Pass. Wrong-case, whitespace-padded, zero-width-space, Cyrillic look-alike, suff
 ### 1.6 Vulnerabilities found
 
 **C-1 · CRITICAL (production) · Vault account holds a full-access key. Unresolved.**
-`oxchimaobi2026-vault.testnet` was created with a full-access key saved in the owner's local keychain. Anyone with that key can deploy different code or move the account's NEAR directly, bypassing every Sentinel check. Agents cannot exploit this, but the README's claim that "only the contract's checks can release funds" depends on this key being kept safe. Fix for production: after the final deployment, delete the vault account's full-access keys (irreversible: no further upgrades), or move control to a multisig or DAO with an upgrade timelock. Not done here, because it is irreversible and needs your decision.
+`oxchimaobi2026-vault.testnet` was created with a full-access key saved in the owner's local keychain. Anyone with that key can deploy different code or move the account's NEAR directly, bypassing every TrustVault check. Agents cannot exploit this, but the README's claim that "only the contract's checks can release funds" depends on this key being kept safe. Fix for production: after the final deployment, delete the vault account's full-access keys (irreversible: no further upgrades), or move control to a multisig or DAO with an upgrade timelock. Not done here, because it is irreversible and needs your decision.
 
 **H-1 · HIGH · Storage amplification by a compromised agent. Fixed and deployed.**
-`request_transfer` stored the agent-supplied `recipient`, `operation`, `asset` and `memo` verbatim, three times per request: in the record, in the explanation and in the audit event. NEAR pays storage from the contract account's balance, which is the same balance that holds vault funds. A compromised agent, which is exactly Sentinel's threat model, could pad requests to lock vault NEAR as storage stake, and owner withdrawals would then fail with `LackBalanceForState`. Fix: stored and logged copies are now clipped (fields 64 bytes, memo 256, explanation 600, check details 300). Evaluation still runs on the original values, and transfers always use the capsule's recipient, so clipping cannot turn a mismatch into a match (`clipping_never_turns_a_mismatch_into_a_match`). Regression tests: `oversized_agent_strings_are_clipped_before_storage`, `clip_respects_utf8_boundaries`. **[Run by owner] 42/42 contract tests passed; contract upgraded in place with `without-init-call` in transaction `CwgX1tbicw343uZPxJmnQ56EU6DCYnPwUb6PLNwqUQba`. After the upgrade, `get_overview` returned the same owner and all prior state (10 requests, 3 capsules, 20 audit events).**
+`request_transfer` stored the agent-supplied `recipient`, `operation`, `asset` and `memo` verbatim, three times per request: in the record, in the explanation and in the audit event. NEAR pays storage from the contract account's balance, which is the same balance that holds vault funds. A compromised agent, which is exactly TrustVault's threat model, could pad requests to lock vault NEAR as storage stake, and owner withdrawals would then fail with `LackBalanceForState`. Fix: stored and logged copies are now clipped (fields 64 bytes, memo 256, explanation 600, check details 300). Evaluation still runs on the original values, and transfers always use the capsule's recipient, so clipping cannot turn a mismatch into a match (`clipping_never_turns_a_mismatch_into_a_match`). Regression tests: `oversized_agent_strings_are_clipped_before_storage`, `clip_respects_utf8_boundaries`. **[Run by owner] 42/42 contract tests passed; contract upgraded in place with `without-init-call` in transaction `CwgX1tbicw343uZPxJmnQ56EU6DCYnPwUb6PLNwqUQba`. After the upgrade, `get_overview` returned the same owner and all prior state (10 requests, 3 capsules, 20 audit events).**
 
 **M-1 · MEDIUM · Storage stake is not reconciled with the vault ledger. Unresolved.**
 `vault_balance` is an internal ledger; storage stake comes out of the same account balance. If storage grows faster than the surplus, transfers and withdrawals fail. They are refunded correctly, but funds stay stuck until storage is freed. Mitigation: keep a surplus (at least 3 NEAR) above `vault_balance` on the account. **[Run by owner] after the upgrade: contract balance ≈ 10.89 NEAR, vault ledger 0.89 NEAR, so the surplus is ≈ 10 NEAR. OK for now.** Proper fix: include storage cost in the liquidity check.
@@ -250,4 +250,4 @@ Still open:
 | Reliability and performance | 6/10 | Graceful RPC failure handling. Heavy bundle, single RPC. |
 | Deployment and operations | 6/15 | Deployed, building, contract upgraded. README update and web redeploy pending; no monitoring or alerting. |
 
-Sentinel does what it claims on testnet, and the core idea is backed by real on-chain evidence. It should not hold real funds until C-1 and H-2 are closed and an independent audit has been done.
+TrustVault does what it claims on testnet, and the core idea is backed by real on-chain evidence. It should not hold real funds until C-1 and H-2 are closed and an independent audit has been done.

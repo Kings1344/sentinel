@@ -10,7 +10,7 @@ const EXAMPLE = [
 ];
 
 const STEPS = [
-  ["You write the instruction", "“Pay vendor.testnet up to 3 NEAR for this invoice, valid 24 hours.” Sentinel drafts the exact permissions from it."],
+  ["You write the instruction", "“Pay vendor.testnet up to 3 NEAR for this invoice, valid 24 hours.” TrustVault drafts the exact permissions from it."],
   ["You review and sign", "You see what the agent may and may not do, plus a fingerprint of the terms. Your wallet signs them to the vault contract."],
   ["The agent asks", "The agent is its own NEAR account, with a key that can only request payments. It never holds your keys or funds."],
   ["The contract checks every field", "Agent, capsule, expiry, replay, operation, asset, recipient, limits and balance. One mismatch and nothing moves."],
@@ -24,7 +24,7 @@ export default function Landing() {
     <div className="min-h-screen">
       <nav aria-label="Main" className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <span className="flex items-center gap-2.5 text-[15px] font-semibold">
-          <span className="grid size-8 place-items-center rounded-lg border border-pass/30 bg-pass/10"><ShieldCheck className="size-[18px] text-[#34d399]" /></span>Sentinel
+          <span className="grid size-8 place-items-center rounded-lg border border-pass/30 bg-pass/10"><ShieldCheck className="size-[18px] text-[#34d399]" /></span>TrustVault
         </span>
         <div className="flex items-center gap-6 text-sm">
           <a href="#how" className="hidden text-dim transition-colors hover:text-fg sm:inline">How it works</a>
@@ -36,7 +36,7 @@ export default function Landing() {
       <header className="mx-auto grid max-w-6xl gap-14 px-6 pt-16 pb-24 lg:grid-cols-[1fr_1.05fr] lg:items-center lg:pt-24">
         <div>
           <span className="inline-flex items-center gap-2 rounded-full border border-line-strong bg-panel px-3 py-1 text-[13px] text-dim"><span className="size-1.5 rounded-full bg-pass" />Live on NEAR testnet</span>
-          <h1 className="mt-6 max-w-xl text-[44px] leading-[1.05] font-semibold tracking-[-0.035em] sm:text-[56px]">Your AI can act. Sentinel makes sure it acts on your instructions.</h1>
+          <h1 className="mt-6 max-w-xl text-[44px] leading-[1.05] font-semibold tracking-[-0.035em] sm:text-[56px]">Your AI can act. TrustVault makes sure it acts on your instructions.</h1>
           <p className="mt-6 max-w-lg text-lg leading-relaxed text-dim">A NEAR vault that checks every payment your AI agent requests against the exact terms you signed, and refuses everything else.</p>
           <div className="mt-9 flex flex-wrap gap-3">
             <Link href="/console" className={`${btn} bg-signal text-white hover:bg-[#5374f5]`}>Open the console<ArrowRight className="size-4" /></Link>
@@ -60,7 +60,7 @@ export default function Landing() {
           <h2 className="max-w-md text-[30px] leading-tight font-semibold tracking-[-0.025em]">A payment can pass every limit and still not be what you asked for.</h2>
           <div className="space-y-5 text-[16px] leading-relaxed text-dim">
             <p>Agents read web pages, emails and tool output. Any of them can carry instructions. A hijacked agent rarely tries to drain a wallet; it makes a small, plausible payment to the wrong place.</p>
-            <p>Spending limits check the size of a payment. Sentinel checks its meaning: the recipient, asset, operation and amount you approved for that task, for that agent, until that time, once.</p>
+            <p>Spending limits check the size of a payment. TrustVault checks its meaning: the recipient, asset, operation and amount you approved for that task, for that agent, until that time, once.</p>
           </div>
         </div>
       </section>
@@ -100,7 +100,7 @@ export default function Landing() {
 
       <footer className="border-t border-line">
         <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-3 px-6 py-8 text-sm text-faint">
-          <span>Sentinel. Built at NEAR HACKATHON 2026. Testnet only.</span>
+          <span>TrustVault. Built at NEAR HACKATHON 2026. Testnet only.</span>
           <Link href="/console" className="transition-colors hover:text-dim">Console</Link>
         </div>
       </footer>

@@ -1,6 +1,6 @@
 # Attack Lab
 
-The Attack Lab takes a real capsule, adds scripted untrusted content (a web page, email, invoice or tool result), lets the demo agent build a proposal from both, and submits it to the deployed contract signed as the agent. The agent is deliberately vulnerable: later instructions override earlier ones. Sentinel does not try to make the agent safe; it limits what a fooled agent can do.
+The Attack Lab takes a real capsule, adds scripted untrusted content (a web page, email, invoice or tool result), lets the demo agent build a proposal from both, and submits it to the deployed contract signed as the agent. The agent is deliberately vulnerable: later instructions override earlier ones. TrustVault does not try to make the agent safe; it limits what a fooled agent can do.
 
 Two modes:
 

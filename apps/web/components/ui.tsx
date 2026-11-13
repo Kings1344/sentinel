@@ -1,5 +1,5 @@
 "use client";
-/** Sentinel design system primitives. Every page builds on these, so spacing and type stay consistent. */
+/** TrustVault design system primitives. Every page builds on these, so spacing and type stay consistent. */
 import { forwardRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
 import { ChevronDown, Loader2, Info, AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
 import { cx } from "@/lib/cx";

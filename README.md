@@ -1,8 +1,8 @@
-# Sentinel
+# TrustVault
 
-**Your AI can act. Sentinel makes sure it acts on your instructions.**
+**Your AI can act. TrustVault makes sure it acts on your instructions.**
 
-Sentinel is a NEAR smart-contract vault that holds native NEAR for an owner and releases it to an AI agent only when every field of the agent's request matches an *Intent Capsule* the owner signed: agent, operation, asset, recipient, per-payment and total limits, expiry, and a fresh nonce. Anything else is refused by the contract, recorded on-chain and explained.
+TrustVault is a NEAR smart-contract vault that holds native NEAR for an owner and releases it to an AI agent only when every field of the agent's request matches an *Intent Capsule* the owner signed: agent, operation, asset, recipient, per-payment and total limits, expiry, and a fresh nonce. Anything else is refused by the contract, recorded on-chain and explained.
 
 Built at NEAR HACKATHON 2026. Track: **AI Security & Defense** (`security`).
 
@@ -46,7 +46,7 @@ near contract call-function as-read-only oxchimaobi2026-vault.testnet get_reques
 
 | Layer | Where it runs | Authority |
 | --- | --- | --- |
-| Sentinel Vault contract (Rust, near-sdk 5) | NEAR Testnet | **Decides.** Holds funds, stores capsules, checks every request, releases or refuses. |
+| TrustVault contract (Rust, near-sdk 5) | NEAR Testnet | **Decides.** Holds funds, stores capsules, checks every request, releases or refuses. |
 | Security engine (`packages/engine`, TypeScript) | Browser and server | Mirrors the contract's checks for previews, Attack Lab simulation, instruction parsing and risk analysis. Never decides. |
 | Web console (Next.js 15) | Browser + two API routes on Vercel | Owner signs capsules and controls with their wallet; the Attack Lab drives a demo agent. |
 | Demo agent | `/api/agent` route, signs as the agent account | Builds proposals from the owner task plus untrusted content. Deterministic and vulnerable to injection on purpose. An optional LLM mode exists (`ANTHROPIC_API_KEY`) but is not used in the deployment and is untested. |
@@ -147,7 +147,7 @@ npm run build:contract          # contract wasm: `cargo near build non-reproduci
 
 - Native NEAR only. Token transfers, swaps and arbitrary contract calls are refused, not supported.
 - One vault per contract deployment, with one owner. Visitors see the demo vault read-only.
-- Sentinel enforces the capsule you sign. A capsule with the wrong recipient is enforced as written.
+- TrustVault enforces the capsule you sign. A capsule with the wrong recipient is enforced as written.
 - The instruction parser is deterministic and narrow. It drafts; the owner must check every field.
 - The demo agent route is rate-limited per IP but unauthenticated; anyone can spend the agent key's gas allowance, and only on payments the active capsule allows.
 - Request records beyond the newest 500 are pruned from contract state (events remain in transaction logs).

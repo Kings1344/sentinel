@@ -48,7 +48,7 @@ export const SCENARIOS: Scenario[] = [
   {
     id: "authorized",
     title: "Authorized payment",
-    summary: "The agent does exactly what the owner asked. Sentinel approves and the contract releases funds.",
+    summary: "The agent does exactly what the owner asked. TrustVault approves and the contract releases funds.",
     kind: "baseline",
     expected: { decision: "Approved", reason: "Authorized" },
     defaultExternalContent: () => "",

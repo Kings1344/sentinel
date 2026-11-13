@@ -1,6 +1,6 @@
 # Competitive analysis
 
-Research done on 2026-11-09. Short and honest by design: a feature is listed as "documented" only where a public source says so, and nothing here claims Sentinel's ideas are new. Re-check before submitting; projects change during a hackathon.
+Research done on 2026-11-09. Short and honest by design: a feature is listed as "documented" only where a public source says so, and nothing here claims TrustVault's ideas are new. Re-check before submitting; projects change during a hackathon.
 
 ## What was found
 
@@ -14,7 +14,7 @@ Research done on 2026-11-09. Short and honest by design: a feature is listed as 
 
 ## Comparison
 
-| | OutLayer Agent Custody | AgentLeash | Gateway middleware (PolicyLayer, LetAgentPay) | Sentinel |
+| | OutLayer Agent Custody | AgentLeash | Gateway middleware (PolicyLayer, LetAgentPay) | TrustVault |
 | --- | --- | --- | --- | --- |
 | Chain | NEAR (+ cross-chain via Intents) | EVM (ERC-7715) | Off-chain | NEAR |
 | Where rules are enforced | TEE | Wallet permission system | Gateway server | NEAR smart contract |
@@ -30,12 +30,12 @@ Research done on 2026-11-09. Short and honest by design: a feature is listed as 
 | Attack simulation for users | — | — | — | Attack Lab, on-chain |
 | Asset coverage | Broad | ERC-20 etc. | Broad | Native NEAR only |
 
-## Where Sentinel overlaps
+## Where TrustVault overlaps
 
 - Spending limits, freeze and revoke are table stakes. OutLayer and the middleware tools cover them, often with broader asset support.
-- Policy enforcement the agent cannot bypass is also OutLayer's core claim. OutLayer gets it from a TEE; Sentinel gets it from contract custody.
+- Policy enforcement the agent cannot bypass is also OutLayer's core claim. OutLayer gets it from a TEE; TrustVault gets it from contract custody.
 
-## Where Sentinel is different (and narrow)
+## Where TrustVault is different (and narrow)
 
 1. **Task-scoped intent, not account-wide policy.** A capsule binds one agent to one recipient, one operation, one asset, limits and an expiry for one instruction. The demo point is a payment that passes the spending limit and is still refused because it is not what the owner asked for.
 2. **Verifiable on-chain, no extra trust.** Enforcement is plain contract code anyone can read and test; there is no enclave or operator to trust. The cost: native NEAR only and public data.
@@ -44,4 +44,4 @@ Research done on 2026-11-09. Short and honest by design: a feature is listed as 
 5. **Refusals are first-class records.** Violations are stored and returned rather than panicked, so the audit trail shows attacks, not just successes.
 6. **Attack Lab against the real contract.** Judges trigger seven attack classes and see the contract's own decision and transaction.
 
-Sentinel and OutLayer are complementary: a capsule check could sit in front of a TEE custody wallet. That is future work, not a claim.
+TrustVault and OutLayer are complementary: a capsule check could sit in front of a TEE custody wallet. That is future work, not a claim.

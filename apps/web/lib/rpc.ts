@@ -40,7 +40,7 @@ export async function viewCall<T>(method: string, args: Record<string, unknown> 
   return JSON.parse(text) as T;
 }
 
-/** Pull NEP-297 events emitted by the Sentinel contract out of a transaction outcome. */
+/** Pull NEP-297 events emitted by the TrustVault contract out of a transaction outcome. */
 export function extractEvents(outcome: unknown): { event: string; data: any[] }[] {
   const o = outcome as { receipts_outcome?: { outcome: { logs: string[] } }[] } | undefined;
   const logs = o?.receipts_outcome?.flatMap((r) => r.outcome.logs) ?? [];
