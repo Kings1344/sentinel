@@ -137,7 +137,7 @@ npm run build:contract          # contract wasm: `cargo near build non-reproduci
 | Contract unit tests (`cargo +stable test --lib`) | 42/42 passing |
 | Contract build (`cargo near build non-reproducible-wasm --no-abi`) | Builds (≈287 KB wasm) |
 | Testnet deployment | Live at `oxchimaobi2026-vault.testnet`, upgraded with the audit fix |
-| Production web build (`npm run build`) | Passing: 12 pages, 2 API routes |
+| Production web build (`npm run build`) | Passing: 10 pages, 2 API routes |
 | Public deployment | Live at https://trustvault-nearhack.vercel.app (Vercel, root directory `apps/web`) |
 | Web console against the live contract | Owner wallet (Meteor), deposit, agent registration, capsule creation with commitment check, all 8 Attack Lab scenarios run on-chain (table above) |
 | End-to-end sandbox tests (`near-workspaces`) | Not included: the sandbox does not run on Windows, where this project was built. The live testnet transactions cover the same flows. |
