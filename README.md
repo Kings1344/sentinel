@@ -8,6 +8,8 @@ Built at NEAR HACKATHON 2026. Track: **AI Security & Defense** (`security`).
 
 **Live demo:** https://trustvault-nearhack.vercel.app
 
+**Demo video:** https://x.com/oxchimaobi/status/2121618093999013930
+
 **Live contract on NEAR Testnet:** [`oxchimaobi2026-vault.testnet`](https://testnet.nearblocks.io/address/oxchimaobi2026-vault.testnet)
 
 ---
